@@ -1,0 +1,20 @@
+{
+  "name": "@mrstockd/workflows",
+  "version": "0.0.0",
+  "private": true,
+  "license": "AGPL-3.0-only",
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@mrstockd/core": "workspace:*",
+    "@mrstockd/db": "workspace:*"
+  },
+  "devDependencies": {
+    "@mrstockd/config": "workspace:*",
+    "@types/node": "^22.19.0",
+    "typescript": "~5.9.3"
+  }
+}

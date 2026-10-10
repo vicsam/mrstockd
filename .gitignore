@@ -1,0 +1,15 @@
+node_modules/
+dist/
+.next/
+.turbo/
+coverage/
+*.tsbuildinfo
+next-env.d.ts
+
+# Secrets: never commit real values
+.env
+.env.*
+!.env.example
+
+.DS_Store
+*.log
