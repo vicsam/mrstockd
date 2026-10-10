@@ -21,12 +21,12 @@ Built for the [PayPal AI Hackathon](https://paypalaihackathon.devpost.com/) (Oct
 ```
 apps/
   web/        Next.js: storefront, checkout, seller and admin dashboards
-  gateway/    Hono: API-key auth, metering, proxy to sellers' tools
+  gateway/    Hono: API-key auth, credits, rate limits, metering, SSRF-safe proxy
   mcp/        MCP server: lets AI agents search and buy
   workflows/  Render Workflows: vetting, access provisioning, seller payouts
 packages/
-  core/       Pricing, API keys, SSRF guard, env parsing (shared, tested)
-  db/         Drizzle schema and client
+  core/       Pricing, API keys, secret encryption, SSRF guard (shared, tested)
+  db/         Drizzle schema, migrations, and an in-memory test database
   config/     Shared TypeScript config
 ```
 
@@ -55,9 +55,11 @@ Requirements: Node 22+, pnpm 10+, Postgres 15+ with the `pgvector` extension.
 ```bash
 pnpm install
 cp .env.example .env          # fill in values
-pnpm db:migrate               # after the first migration is generated
+pnpm db:migrate               # creates the pgvector extension and all tables
 pnpm dev                      # runs every app
 ```
+
+Tests need no database server: they run against an in-process Postgres (PGlite) with every migration applied.
 
 | App | Local URL |
 |---|---|
@@ -65,6 +67,28 @@ pnpm dev                      # runs every app
 | Gateway | http://localhost:8787/health |
 
 Other commands: `pnpm typecheck`, `pnpm test`, `pnpm build`.
+
+## Calling a tool through the gateway
+
+Every tool on MrStockd is called the same way, with the API key issued at purchase:
+
+```bash
+curl https://<gateway-host>/v1/tools/<tool-slug>/<path> \
+  -H "Authorization: Bearer mrs_live_..." \
+  -H "Content-Type: application/json" \
+  -d '{"input": "..."}'
+```
+
+The gateway checks the key, the tool, the rate limit, and the buyer's credits or subscription, then forwards the call to the seller's endpoint with the seller's own credential. The buyer's key never reaches the seller.
+
+| Response | Meaning |
+|---|---|
+| Seller's status and body | The call went through. `X-MrStockd-Credits-Remaining` shows the balance on credit-pack keys. |
+| `401 invalid_api_key` / `api_key_revoked` | Missing, wrong, or revoked key |
+| `402 insufficient_credits` / `subscription_inactive` | Buy more credits or renew |
+| `403 key_not_valid_for_tool` | The key belongs to a different tool |
+| `429 rate_limited` | Too many calls; wait for `Retry-After` seconds |
+| `502` / `504` | The seller's tool failed, timed out, or tried to redirect. No credit is charged. |
 
 ## Security principles
 
@@ -75,7 +99,8 @@ These are built in from the first commit, not added later:
 - Every PayPal create call sends a `PayPal-Request-Id`, so retries never double-charge.
 - MrStockd API keys are stored as hashes only and shown once.
 - Sellers' upstream secrets are encrypted with AES-256-GCM.
-- Seller endpoints pass an SSRF guard on save and on every proxied call.
+- Seller endpoints pass an SSRF guard on save and on every proxied call, re-checked at connect time so DNS rebinding can't reach internal addresses. Redirects are refused.
+- Credits are taken with a single conditional database update, so concurrent calls can never spend the same credit. Failed seller calls are refunded.
 - Agent spending limits are enforced server-side.
 - The hackathon build runs on the PayPal **sandbox** only.
 

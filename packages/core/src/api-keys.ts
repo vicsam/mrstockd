@@ -6,7 +6,7 @@ import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
  *
  * Format: mrs_live_<prefix>_<secret> (or mrs_test_ in the sandbox).
  * The prefix is stored in plain text so a key can be looked up and shown
- * in dashboards ("mrs_test_a1b2c3d4…") without exposing the secret.
+ * in dashboards ("mrs_test_a1b2c3d4e5f6…") without exposing the secret.
  */
 
 export type KeyEnvironment = "live" | "test";
@@ -20,14 +20,15 @@ export interface IssuedApiKey {
   hash: string;
 }
 
-const KEY_PATTERN = /^mrs_(live|test)_([a-f0-9]{8})_([A-Za-z0-9_-]{43})$/;
+// 12 hex chars (48 bits) keeps prefix collisions negligible into the millions of keys.
+const KEY_PATTERN = /^mrs_(live|test)_([a-f0-9]{12})_([A-Za-z0-9_-]{43})$/;
 
 export function hashApiKey(key: string): string {
   return createHash("sha256").update(key, "utf8").digest("hex");
 }
 
 export function generateApiKey(env: KeyEnvironment): IssuedApiKey {
-  const prefix = randomBytes(4).toString("hex");
+  const prefix = randomBytes(6).toString("hex");
   const secret = randomBytes(32).toString("base64url");
   const key = `mrs_${env}_${prefix}_${secret}`;
   return { key, prefix, hash: hashApiKey(key) };

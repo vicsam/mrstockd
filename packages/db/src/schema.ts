@@ -111,7 +111,10 @@ export const apiKeys = pgTable("api_keys", {
   prefix: text("prefix").notNull(),
   /** SHA-256 of the full key. The key itself is never stored. */
   keyHash: text("key_hash").notNull(),
+  /** Credit-pack listings: calls left. Each successful call uses one credit. */
   creditsRemaining: integer("credits_remaining").notNull().default(0),
+  /** Subscription listings: access ends at this time (extended by each renewal webhook). */
+  validUntil: timestamp("valid_until", { withTimezone: true }),
   revokedAt: timestamp("revoked_at", { withTimezone: true }),
   lastUsedAt: timestamp("last_used_at", { withTimezone: true }),
   ...timestamps,

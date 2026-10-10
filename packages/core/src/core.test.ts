@@ -1,5 +1,26 @@
 import { describe, expect, it } from "vitest";
-import { assertSafeOutboundUrl, cents, computeOrderTotals, generateApiKey, isBlockedAddress, parseApiKeyPrefix, toPayPalValue, verifyApiKey } from "./index.js";
+import { randomBytes } from "node:crypto";
+import { assertSafeOutboundUrl, cents, computeOrderTotals, decryptSecret, encryptSecret, generateApiKey, isBlockedAddress, parseApiKeyPrefix, parseEncryptionKey, toPayPalValue, verifyApiKey } from "./index.js";
+
+describe("secrets", () => {
+  const key = parseEncryptionKey(randomBytes(32).toString("base64"));
+
+  it("round-trips and uses a fresh IV each time", () => {
+    const a = encryptSecret("sk_seller_123", key);
+    const b = encryptSecret("sk_seller_123", key);
+    expect(a).not.toBe(b);
+    expect(decryptSecret(a, key)).toBe("sk_seller_123");
+  });
+
+  it("rejects tampering, wrong keys, and bad key sizes", () => {
+    const stored = encryptSecret("secret", key);
+    const parts = stored.split(".");
+    parts[3] = Buffer.from("tampered").toString("base64url");
+    expect(() => decryptSecret(parts.join("."), key)).toThrow();
+    expect(() => decryptSecret(stored, parseEncryptionKey(randomBytes(32).toString("base64")))).toThrow();
+    expect(() => parseEncryptionKey(randomBytes(16).toString("base64"))).toThrow();
+  });
+});
 
 describe("money", () => {
   it("splits an order into fee and payout without losing cents", () => {

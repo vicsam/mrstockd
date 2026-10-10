@@ -75,6 +75,11 @@ export function isBlockedAddress(ip: string): boolean {
 export interface SafeUrlOptions {
   /** Allow http:// (only for local development). Defaults to false. */
   allowHttp?: boolean;
+  /**
+   * Skip the private-address checks. Only for local development and tests,
+   * where tools run on localhost. Never enable in production.
+   */
+  allowPrivate?: boolean;
 }
 
 /**
@@ -97,6 +102,8 @@ export async function assertSafeOutboundUrl(
   if (url.username || url.password) throw new UnsafeUrlError("credentials in URL");
 
   const host = url.hostname.replace(/^\[|\]$/g, "");
+  if (options.allowPrivate) return { url, addresses: [] };
+
   const lowerHost = host.toLowerCase();
   if (lowerHost === "localhost" || lowerHost.endsWith(".localhost") || lowerHost.endsWith(".internal")) {
     throw new UnsafeUrlError("internal hostname");
