@@ -2,7 +2,7 @@ import { PGlite } from "@electric-sql/pglite";
 import { vector } from "@electric-sql/pglite-pgvector";
 import { drizzle } from "drizzle-orm/pglite";
 import { migrate } from "drizzle-orm/pglite/migrator";
-import { migrationsFolder } from "./index.js";
+import { migrationsFolder } from "./migrations.js";
 import * as schema from "./schema.js";
 
 /**

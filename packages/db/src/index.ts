@@ -1,4 +1,3 @@
-import { fileURLToPath } from "node:url";
 import type { PgDatabase, PgQueryResultHKT } from "drizzle-orm/pg-core";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
@@ -19,6 +18,3 @@ export function createDb(databaseUrl: string) {
 }
 
 export type Db = ReturnType<typeof createDb>;
-
-/** Absolute path to the SQL migrations, for programmatic migrate() calls. */
-export const migrationsFolder = fileURLToPath(new URL("../migrations", import.meta.url));

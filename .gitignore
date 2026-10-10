@@ -13,3 +13,6 @@ next-env.d.ts
 
 .DS_Store
 *.log
+
+# Files that dev tools generate for AI coding agents
+AGENTS.md

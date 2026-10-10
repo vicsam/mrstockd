@@ -14,6 +14,10 @@
     "./testing": {
       "types": "./dist/testing.d.ts",
       "default": "./dist/testing.js"
+    },
+    "./migrations": {
+      "types": "./dist/migrations.d.ts",
+      "default": "./dist/migrations.js"
     }
   },
   "scripts": {

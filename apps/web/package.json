@@ -11,11 +11,14 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@mrstockd/auth": "workspace:*",
     "@mrstockd/core": "workspace:*",
     "@mrstockd/db": "workspace:*",
+    "better-auth": "^1.7.7",
     "next": "^16.4.0",
     "react": "^19.3.0",
-    "react-dom": "^19.3.0"
+    "react-dom": "^19.3.0",
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.3",

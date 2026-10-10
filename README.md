@@ -25,6 +25,7 @@ apps/
   mcp/        MCP server: lets AI agents search and buy
   workflows/  Render Workflows: vetting, access provisioning, seller payouts
 packages/
+  auth/       Better Auth setup: accounts, sessions, teams (shared, tested)
   core/       Pricing, API keys, secret encryption, SSRF guard (shared, tested)
   db/         Drizzle schema, migrations, and an in-memory test database
   config/     Shared TypeScript config
@@ -50,14 +51,24 @@ The hackathon asks entrants to name each AI tool and PayPal capability and how i
 
 ## Getting started
 
-Requirements: Node 22+, pnpm 10+, Postgres 15+ with the `pgvector` extension.
+Requirements: Node 22+, pnpm 10+, and Postgres 15+ with the `pgvector` extension. The quickest way to get Postgres is Docker:
+
+```bash
+docker run -d --name mrstockd-db -p 5432:5432 \
+  -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=mrstockd \
+  pgvector/pgvector:pg17
+```
+
+Then:
 
 ```bash
 pnpm install
-cp .env.example .env          # fill in values
+cp .env.example .env          # set BETTER_AUTH_SECRET (openssl rand -base64 32)
 pnpm db:migrate               # creates the pgvector extension and all tables
 pnpm dev                      # runs every app
 ```
+
+All apps read the single `.env` at the repo root. Real environment variables always take precedence over it.
 
 Tests need no database server: they run against an in-process Postgres (PGlite) with every migration applied.
 
@@ -102,6 +113,8 @@ These are built in from the first commit, not added later:
 - Seller endpoints pass an SSRF guard on save and on every proxied call, re-checked at connect time so DNS rebinding can't reach internal addresses. Redirects are refused.
 - Credits are taken with a single conditional database update, so concurrent calls can never spend the same credit. Failed seller calls are refunded.
 - Agent spending limits are enforced server-side.
+- Accounts: passwords hashed with scrypt; HttpOnly, SameSite=Lax session cookies (Secure in production); sign-in and sign-up rate-limited; CSRF and origin checks enforced in every environment, including tests.
+- Auth forms use POST and stay disabled until the page is interactive, so credentials can never end up in a URL.
 - The hackathon build runs on the PayPal **sandbox** only.
 
 ## Roadmap

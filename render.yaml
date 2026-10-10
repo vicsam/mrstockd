@@ -15,6 +15,8 @@ services:
     plan: free # upgrade before judging (Dec 1) to avoid cold starts
     buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm --filter @mrstockd/web... build
     startCommand: pnpm --filter @mrstockd/web start
+    # Paid instances can run migrations automatically before each deploy:
+    # preDeployCommand: pnpm db:migrate
     healthCheckPath: /
     envVars:
       - key: NODE_VERSION
@@ -23,8 +25,12 @@ services:
         fromDatabase:
           name: mrstockd-db
           property: connectionString
+      - key: NODE_ENV
+        value: production
       - key: BETTER_AUTH_SECRET
-        sync: false
+        generateValue: true
+      - key: BETTER_AUTH_URL
+        sync: false # the web service's public URL, e.g. https://mrstockd-web.onrender.com
       - key: PAYPAL_CLIENT_ID
         sync: false
       - key: PAYPAL_CLIENT_SECRET
