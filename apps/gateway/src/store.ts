@@ -36,6 +36,7 @@ export interface UsageRecord {
 export interface GatewayStore {
   findKeyByPrefix(prefix: string): Promise<KeyRecord | null>;
   findListingBySlug(slug: string): Promise<ListingRecord | null>;
+  findListingById(id: string): Promise<(ListingRecord & { name: string }) | null>;
   /**
    * Atomically takes `amount` credits if the key has enough and is not revoked.
    * Returns the credits left, or null if there were not enough.

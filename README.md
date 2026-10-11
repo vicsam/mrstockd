@@ -22,7 +22,7 @@ Built for the [PayPal AI Hackathon](https://paypalaihackathon.devpost.com/) (Oct
 apps/
   web/        Next.js: storefront, checkout, seller and admin dashboards
   gateway/    Hono: API-key auth, credits, rate limits, metering, SSRF-safe proxy
-  mcp/        MCP server: lets AI agents search and buy
+  mcp/        MCP server: lets AI agents find and call tools
   workflows/  Render Workflows: vetting, access provisioning, seller payouts
 packages/
   auth/       Better Auth setup: accounts, sessions, teams (shared, tested)
@@ -149,6 +149,55 @@ The gateway checks the key, the tool, the rate limit, and the buyer's credits or
 | `503 tool_unavailable` | The tool isn't live (paused or not yet approved). Sellers' test keys still work. |
 | `429 rate_limited` | Too many calls; wait for `Retry-After` seconds |
 | `502` / `504` | The seller's tool failed, timed out, or tried to redirect. No credit is charged. |
+
+## Discovering tools over HTTP
+
+The gateway also serves the public catalog, so apps and agents can find tools without a browser. These return live tools only, with public fields (never endpoints or secrets), and are rate-limited per client.
+
+| Endpoint | Returns |
+|---|---|
+| `GET /v1/catalog/tools?q=<words>&pricing=credits\|subscription&limit=10` | Matching tools, best first |
+| `GET /v1/catalog/tools/<slug>` | One tool, with its full description |
+| `GET /v1/keys/me` (with your key) | Which tool the key is for, and credits left or subscription end. Free. |
+
+## Using MrStockd from an AI agent (MCP)
+
+`apps/mcp` is a [Model Context Protocol](https://modelcontextprotocol.io) server. Any MCP client (desktop AI apps, Cursor, VS Code, your own agent) can use it to search MrStockd and call the tools you have keys for.
+
+| MCP tool | What it does |
+|---|---|
+| `search_tools` | Find tools for a task, optionally under a price. Shows which ones you already have a key for. |
+| `get_tool` | A tool's full description, price, and whether you can call it now |
+| `my_keys` | Your keys (by prefix only), with credits left |
+| `call_tool` | Call a tool through the gateway. One credit per successful call. |
+
+Build it once with `pnpm build`, then add it to your MCP client's config. Most clients use this shape (on Windows, write the path with double backslashes, e.g. `C:\\Users\\you\\mrstockd\\apps\\mcp\\dist\\index.js`):
+
+```json
+{
+  "mcpServers": {
+    "mrstockd": {
+      "command": "node",
+      "args": ["/path/to/mrstockd/apps/mcp/dist/index.js"],
+      "env": {
+        "MRSTOCKD_GATEWAY_URL": "http://localhost:8787",
+        "MRSTOCKD_API_KEYS": "mrs_test_..., mrs_live_..."
+      }
+    }
+  }
+}
+```
+
+To try it without an AI app, use the MCP Inspector: `npx @modelcontextprotocol/inspector node apps/mcp/dist/index.js`, then set the two variables in its sidebar.
+
+Guardrails, enforced outside the model:
+
+- The server only uses the public API: it can't see endpoints, secrets, or other people's data.
+- Keys are never shown to the model, only their short prefix.
+- Every call is metered, rate-limited and refunded on seller failure by the gateway, exactly like any other buyer's call.
+- Paths that could leave the tool (`..`, absolute URLs, `//host`) are refused.
+- Tool results are labelled `untrustedOutput`, and the server tells the model to treat them as data, never as instructions.
+- With no key, the agent gets the tool's price and store link to pass to the person. Buying stays with the person, through PayPal.
 
 ## Security principles
 

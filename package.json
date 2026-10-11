@@ -15,7 +15,8 @@
     "test": "turbo run test",
     "db:generate": "pnpm --filter @mrstockd/db generate",
     "db:migrate": "pnpm --filter @mrstockd/db migrate",
-    "sample-tool": "node examples/sample-tool/server.mjs"
+    "sample-tool": "node examples/sample-tool/server.mjs",
+    "mcp": "node apps/mcp/dist/index.js"
   },
   "devDependencies": {
     "turbo": "^2.11.7",

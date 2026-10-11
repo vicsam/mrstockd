@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@hono/node-server": "^2.1.4",
+    "@mrstockd/catalog": "workspace:*",
     "@mrstockd/core": "workspace:*",
     "@mrstockd/db": "workspace:*",
     "hono": "^4.13.13",

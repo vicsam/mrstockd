@@ -1,40 +1,21 @@
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { z } from "zod";
+import { createGatewayClient } from "./gateway-client.js";
+import { createKeyring, parseKeyList } from "./keyring.js";
+import { createMrstockdServer } from "./server.js";
 
 /**
- * MrStockd MCP server: lets any MCP-capable agent
- * search the store and request purchases.
+ * Local (stdio) entry point for desktop AI apps, Cursor and other MCP clients.
  *
- * Money rules enforced server-side, never by the model:
- *   - prices come from the database, not from tool arguments
- *   - every purchase needs the human's approval in PayPal unless it is
- *     under the agent's approval threshold and within its monthly budget
- *   - each purchase request carries an idempotency key
+ *   MRSTOCKD_GATEWAY_URL  the gateway, default http://localhost:8787
+ *   MRSTOCKD_API_KEYS     your MrStockd keys, comma or space separated
  *
- * Runs over stdio for local use. A Streamable HTTP transport for the
- * hosted version is added alongside the purchase flow.
+ * Logs go to stderr: stdout carries the MCP protocol.
  */
-const server = new McpServer({ name: "mrstockd", version: "0.0.0" });
+const gatewayUrl = process.env.MRSTOCKD_GATEWAY_URL ?? "http://localhost:8787";
+const { keys, malformed } = parseKeyList(process.env.MRSTOCKD_API_KEYS);
+if (malformed) console.error(`mrstockd: ignored ${malformed} value(s) in MRSTOCKD_API_KEYS that aren't MrStockd keys (mrs_live_… or mrs_test_…).`);
 
-server.registerTool(
-  "search_tools",
-  {
-    title: "Search MrStockd",
-    description: "Find AI tools for a task. Returns matching listings with price and pricing model.",
-    inputSchema: {
-      query: z.string().min(2).max(500).describe("What the tool should do"),
-      maxPriceUsd: z.number().positive().max(10_000).optional(),
-    },
-  },
-  async ({ query }) => ({
-    content: [
-      {
-        type: "text",
-        text: JSON.stringify({ query, results: [], note: "Search is wired to the catalog in week 2." }),
-      },
-    ],
-  }),
-);
-
+const client = createGatewayClient({ baseUrl: gatewayUrl });
+const server = createMrstockdServer({ client, keys: createKeyring(client, keys) });
 await server.connect(new StdioServerTransport());
+console.error(`mrstockd MCP server ready (gateway ${gatewayUrl}, ${keys.length} key${keys.length === 1 ? "" : "s"})`);

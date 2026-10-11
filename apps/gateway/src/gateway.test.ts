@@ -5,6 +5,7 @@ import { encryptSecret, generateApiKey, parseEncryptionKey } from "@mrstockd/cor
 import { apiKeys, eq, listings, sellers, usageEvents } from "@mrstockd/db";
 import { createTestDb } from "@mrstockd/db/testing";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { createCatalog } from "@mrstockd/catalog";
 import { createApp } from "./app.js";
 import { createDbStore } from "./db-store.js";
 import { createMemoryRateLimiter } from "./rate-limit.js";
@@ -115,6 +116,8 @@ async function usageFor(keyId: string) {
 
 function makeApp(overrides: { allowPrivate?: boolean; rateLimit?: number; timeoutMs?: number } = {}) {
   return createApp({
+    catalog: createCatalog({ db: testDb.db, encryptionKey, allowPrivateEndpoints: true }),
+    publicUrls: { store: "https://store.example", gateway: "https://api.example" },
     store: createDbStore(testDb.db),
     upstream: createUpstreamClient({ allowPrivate: overrides.allowPrivate ?? true, timeoutMs: overrides.timeoutMs ?? 5000 }),
     rateLimiter: createMemoryRateLimiter(overrides.rateLimit ?? 1000),
@@ -337,5 +340,71 @@ describe("SSRF protection (production mode)", () => {
   it("refuses private addresses at connect time (DNS rebinding)", async () => {
     const err = await new Promise<Error | null>((resolve) => safeLookup("localhost", {}, (e) => resolve(e)));
     expect(err?.message).toMatch(/blocked address/);
+  });
+});
+
+describe("public discovery", () => {
+  it("searches live tools only, with public fields and no endpoint or secret", async () => {
+    const res = await makeApp().request("/v1/catalog/tools?q=invoice");
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as { total: number; items: Record<string, unknown>[] };
+    expect(body.items.map((t) => t.slug)).toEqual(["invoice-extractor"]);
+    expect(body.items[0]).toMatchObject({
+      name: "Invoice Extractor",
+      seller: "Lagos Labs",
+      pricing: { model: "credits", priceUsd: 5 },
+      storeUrl: "https://store.example/tools/invoice-extractor",
+      callUrl: "https://api.example/v1/tools/invoice-extractor/",
+    });
+    const raw = JSON.stringify(body);
+    expect(raw).not.toContain(sellerUrl);
+    expect(raw).not.toContain("upstream");
+
+    const all = (await (await makeApp().request("/v1/catalog/tools")).json()) as { items: { slug: string }[] };
+    expect(all.items.map((t) => t.slug)).not.toContain("draft-tool");
+  });
+
+  it("returns one live tool's details, and 404 for drafts", async () => {
+    const res = await makeApp().request("/v1/catalog/tools/yoruba-translator");
+    expect(res.status).toBe(200);
+    expect(await res.json()).toMatchObject({ slug: "yoruba-translator", description: "test", pricing: { model: "subscription", period: "month" } });
+    expect((await makeApp().request("/v1/catalog/tools/draft-tool")).status).toBe(404);
+  });
+
+  it("rate-limits discovery per client", async () => {
+    const app = makeApp({ rateLimit: 2 });
+    const hit = (ip: string) => app.request("/v1/catalog/tools", { headers: { "x-forwarded-for": ip } });
+    expect((await hit("1.1.1.1")).status).toBe(200);
+    expect((await hit("1.1.1.1")).status).toBe(200);
+    expect((await hit("1.1.1.1")).status).toBe(429);
+    expect((await hit("2.2.2.2")).status).toBe(200);
+  });
+});
+
+describe("key info", () => {
+  it("says which tool a key is for and what's left, without charging", async () => {
+    const { key, id } = await issueKey("invoice-extractor", { credits: 7 });
+    const res = await call(makeApp(), "/v1/keys/me", key);
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({
+      environment: "live",
+      tool: { slug: "invoice-extractor", name: "Invoice Extractor", available: true },
+      pricingModel: "credits",
+      creditsRemaining: 7,
+      validUntil: null,
+      callUrl: "https://api.example/v1/tools/invoice-extractor/",
+    });
+    expect(await creditsOf(id)).toBe(7);
+    expect(await usageFor(id)).toHaveLength(0);
+  });
+
+  it("shows a seller's test key on a draft as available, and rejects bad keys", async () => {
+    const { key } = await issueKey("draft-tool", { credits: 1, environment: "test" });
+    expect(((await (await call(makeApp(), "/v1/keys/me", key)).json()) as { tool: { available: boolean } }).tool.available).toBe(true);
+    const { key: live } = await issueKey("draft-tool", { credits: 1 });
+    expect(((await (await call(makeApp(), "/v1/keys/me", live)).json()) as { tool: { available: boolean } }).tool.available).toBe(false);
+    expect((await call(makeApp(), "/v1/keys/me", "mrs_live_nope")).status).toBe(401);
+    const { key: revoked } = await issueKey("invoice-extractor", { revoked: true });
+    expect((await call(makeApp(), "/v1/keys/me", revoked)).status).toBe(401);
   });
 });

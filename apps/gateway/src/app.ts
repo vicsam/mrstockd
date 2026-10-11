@@ -3,6 +3,7 @@ import { Hono, type Context } from "hono";
 import { bodyLimit } from "hono/body-limit";
 import { requestId } from "hono/request-id";
 import { secureHeaders } from "hono/secure-headers";
+import { type CatalogReader, type PublicUrls, toPublicTool } from "./public-api.js";
 import type { RateLimiter } from "./rate-limit.js";
 import type { GatewayStore, KeyRecord, ListingRecord } from "./store.js";
 import type { UpstreamClient } from "./upstream.js";
@@ -28,6 +29,11 @@ export interface GatewayDeps {
   rateLimiter: RateLimiter;
   /** Key for decrypting sellers' upstream secrets. */
   encryptionKey: Buffer;
+  /** Public tool discovery (/v1/catalog/*). Omit to turn those routes off. */
+  catalog?: CatalogReader;
+  publicUrls?: PublicUrls;
+  /** The caller's IP, for rate-limiting unauthenticated routes. */
+  clientIp?: (c: Context) => string;
   now?: () => Date;
 }
 
@@ -71,7 +77,31 @@ export function buildUpstreamUrl(endpointUrl: string, subPath: string, search: s
 
 export function createApp(deps: GatewayDeps) {
   const now = deps.now ?? (() => new Date());
+  const publicUrls = deps.publicUrls ?? { store: "http://localhost:3000", gateway: "http://localhost:8787" };
+  const clientIp = deps.clientIp ?? ((c: Context) => c.req.header("x-forwarded-for")?.split(",").pop()?.trim() || "unknown");
   const app = new Hono();
+
+  /** Parses and verifies the Bearer key. Returns the key, or the error response to send. */
+  async function authenticate(c: Context): Promise<KeyRecord | Response> {
+    const header = c.req.header("authorization") ?? "";
+    const presented = header.startsWith("Bearer ") ? header.slice(7).trim() : "";
+    const prefix = parseApiKeyPrefix(presented);
+    if (!prefix) return error(c, 401, "invalid_api_key", "Send a MrStockd API key as: Authorization: Bearer mrs_...");
+
+    const key = await deps.store.findKeyByPrefix(prefix);
+    // Same response for unknown and wrong keys, so keys can't be probed.
+    if (!key || !verifyApiKey(presented, key.keyHash)) {
+      return error(c, 401, "invalid_api_key", "This API key is not valid.");
+    }
+    if (key.revokedAt) return error(c, 401, "api_key_revoked", "This API key has been revoked.");
+    return key;
+  }
+
+  function limit(c: Context, id: string): Response | null {
+    const result = deps.rateLimiter.hit(id);
+    if (result.allowed) return null;
+    return error(c, 429, "rate_limited", "Too many requests. Slow down and retry.", { "Retry-After": String(result.retryAfter) });
+  }
 
   app.use("*", requestId());
   app.use("*", secureHeaders());
@@ -86,25 +116,63 @@ export function createApp(deps: GatewayDeps) {
       about: "This is the API that buyers' apps and AI agents call. It has no web pages.",
       usage: "POST or GET /v1/tools/<tool-slug>/<path> with the header 'Authorization: Bearer <your MrStockd API key>'",
       health: "/health",
+      catalog: deps.catalog ? "/v1/catalog/tools?q=<what you need>" : undefined,
     }),
   );
+
+  /* ----------------------- Public discovery ------------------------ */
+
+  if (deps.catalog) {
+    const catalog = deps.catalog;
+
+    app.get("/v1/catalog/tools", async (c) => {
+      const limited = limit(c, `ip:${clientIp(c)}`);
+      if (limited) return limited;
+      const pricing = c.req.query("pricing");
+      const result = await catalog.search({
+        query: c.req.query("q") ?? "",
+        pricingModel: pricing === "credits" || pricing === "subscription" ? pricing : undefined,
+        limit: Number(c.req.query("limit") ?? 10) || 10,
+        offset: Number(c.req.query("offset") ?? 0) || 0,
+      });
+      return c.json({ total: result.total, items: result.items.map((l) => toPublicTool(l, publicUrls)) });
+    });
+
+    app.get("/v1/catalog/tools/:slug", async (c) => {
+      const limited = limit(c, `ip:${clientIp(c)}`);
+      if (limited) return limited;
+      const listing = await catalog.getPublicListing(c.req.param("slug"));
+      if (!listing) return error(c, 404, "tool_not_found", `No live tool named "${c.req.param("slug")}".`);
+      return c.json(toPublicTool(listing, publicUrls, true));
+    });
+  }
+
+  /** What a key is for and what's left on it. Free: no credit is taken. */
+  app.get("/v1/keys/me", async (c) => {
+    const key = await authenticate(c);
+    if (key instanceof Response) return key;
+    const limited = limit(c, key.id);
+    if (limited) return limited;
+    const listing = await deps.store.findListingById(key.listingId);
+    if (!listing) return error(c, 404, "tool_not_found", "The tool for this key no longer exists.");
+    const subscription = listing.pricingModel === "subscription";
+    return c.json({
+      environment: key.environment,
+      tool: { slug: listing.slug, name: listing.name, available: key.environment === "test" || listing.status === "live" },
+      pricingModel: listing.pricingModel,
+      creditsRemaining: subscription ? null : key.creditsRemaining,
+      validUntil: subscription ? (key.validUntil?.toISOString() ?? null) : null,
+      callUrl: `${publicUrls.gateway.replace(/\/+$/, "")}/v1/tools/${listing.slug}/`,
+    });
+  });
 
   app.all("/v1/tools/:slug/*", async (c) => {
     const started = performance.now();
     const slug = c.req.param("slug");
 
     // 1. API key
-    const header = c.req.header("authorization") ?? "";
-    const presented = header.startsWith("Bearer ") ? header.slice(7).trim() : "";
-    const prefix = parseApiKeyPrefix(presented);
-    if (!prefix) return error(c, 401, "invalid_api_key", "Send a MrStockd API key as: Authorization: Bearer mrs_...");
-
-    const key: KeyRecord | null = await deps.store.findKeyByPrefix(prefix);
-    // Same response for unknown and wrong keys, so keys can't be probed.
-    if (!key || !verifyApiKey(presented, key.keyHash)) {
-      return error(c, 401, "invalid_api_key", "This API key is not valid.");
-    }
-    if (key.revokedAt) return error(c, 401, "api_key_revoked", "This API key has been revoked.");
+    const key = await authenticate(c);
+    if (key instanceof Response) return key;
 
     // 2. Tool
     const listing: ListingRecord | null = await deps.store.findListingBySlug(slug);
@@ -117,12 +185,8 @@ export function createApp(deps: GatewayDeps) {
     if (!isTest && listing.status !== "live") return error(c, 503, "tool_unavailable", "This tool is not currently available.");
 
     // 3. Rate limit
-    const limit = deps.rateLimiter.hit(key.id);
-    if (!limit.allowed) {
-      return error(c, 429, "rate_limited", "Too many requests. Slow down and retry.", {
-        "Retry-After": String(limit.retryAfter),
-      });
-    }
+    const limited = limit(c, key.id);
+    if (limited) return limited;
 
     // 4. Access
     let creditsCharged = 0;

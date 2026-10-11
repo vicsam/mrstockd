@@ -38,6 +38,23 @@ export function createDbStore(db: AnyDb): GatewayStore {
       return row ?? null;
     },
 
+    async findListingById(id) {
+      const [row] = await db
+        .select({
+          id: listings.id,
+          slug: listings.slug,
+          name: listings.name,
+          status: listings.status,
+          pricingModel: listings.pricingModel,
+          endpointUrl: listings.endpointUrl,
+          upstreamSecretEnc: listings.upstreamSecretEnc,
+        })
+        .from(listings)
+        .where(eq(listings.id, id))
+        .limit(1);
+      return row ?? null;
+    },
+
     async consumeCredits(keyId, amount) {
       // Single conditional UPDATE: two concurrent calls can never spend the same credit.
       const [row] = await db

@@ -73,3 +73,10 @@ services:
         value: "5"
       - key: RATE_LIMIT_PER_MINUTE
         value: "60"
+      - key: TRUST_PROXY
+        value: "true"
+      # Public addresses, used in links the API and MCP server hand out.
+      - key: GATEWAY_PUBLIC_URL
+        sync: false
+      - key: BETTER_AUTH_URL
+        sync: false

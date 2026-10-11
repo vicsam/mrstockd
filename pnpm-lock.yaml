@@ -20,6 +20,9 @@ importers:
       '@hono/node-server':
         specifier: ^2.1.4
         version: 2.1.4(hono@4.13.13)
+      '@mrstockd/catalog':
+        specifier: workspace:*
+        version: link:../../packages/catalog
       '@mrstockd/core':
         specifier: workspace:*
         version: link:../../packages/core
@@ -76,6 +79,9 @@ importers:
       typescript:
         specifier: ~5.9.3
         version: 5.9.3
+      vitest:
+        specifier: ^5.0.3
+        version: 5.0.3(@types/node@22.20.5)(vite@8.3.4(@types/node@22.20.5)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15))
 
   apps/web:
     dependencies:
