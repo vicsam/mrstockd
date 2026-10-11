@@ -5,14 +5,16 @@ import { REPO_URL, faqs } from "@/components/landing/content";
 import { LandingFooter } from "@/components/landing/footer";
 import { LandingHeader } from "@/components/landing/header";
 import { Faq } from "@/components/landing/faq";
+import { type FeaturedTool, FeaturedTools } from "@/components/landing/featured-tools";
 import { Hero } from "@/components/landing/hero";
 import { HowItWorks } from "@/components/landing/how-it-works";
 import { Integrations } from "@/components/landing/integrations";
 import { MotionProvider } from "@/components/landing/motion";
 import { ScrollProgress } from "@/components/landing/scroll-progress";
 import { Earnings, Trust } from "@/components/landing/sections";
-import { Testers } from "@/components/landing/testers";
 import "@/components/landing/landing.css";
+import { getCatalog } from "@/lib/catalog";
+import { describePricing } from "@/lib/format";
 
 // Pre-rendered and refreshed at most once a minute, so visitors never wait on a server.
 export const revalidate = 60;
@@ -46,8 +48,22 @@ async function gatewayStatus(): Promise<"ok" | "down" | "unknown"> {
   }
 }
 
+/** The newest live tools. The landing page still renders if the database can't be reached. */
+async function featuredTools(): Promise<{ tools: FeaturedTool[]; total: number }> {
+  try {
+    const { items, total } = await getCatalog().search({ limit: 6 });
+    return {
+      total,
+      tools: items.map((t) => ({ slug: t.slug, name: t.name, summary: t.summary, price: describePricing(t), sellerName: t.sellerName })),
+    };
+  } catch (e) {
+    console.error("landing: could not load featured tools", e);
+    return { tools: [], total: 0 };
+  }
+}
+
 export default async function Home() {
-  const status = await gatewayStatus();
+  const [status, featured] = await Promise.all([gatewayStatus(), featuredTools()]);
   const jsonLd = {
     "@context": "https://schema.org",
     "@graph": [
@@ -79,11 +95,11 @@ export default async function Home() {
         <main id="main">
           <Hero />
           <HowItWorks gatewayUrl={gatewayUrl} />
+          <FeaturedTools tools={featured.tools} total={featured.total} />
           <BuiltForEveryone />
           <Integrations />
           <Trust />
           <Earnings />
-          <Testers />
           <Faq />
         </main>
         <LandingFooter status={status} statusUrl={`${gatewayUrl}/health`} />

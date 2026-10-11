@@ -26,14 +26,6 @@ function CardInfo({ title, body }: { title: string; body: string }) {
   );
 }
 
-function LaterStage() {
-  return (
-    <span className="rounded-full bg-[rgba(202,190,255,0.4)] px-2 py-[2px] text-[10px] leading-[15px] font-bold tracking-[0.5px] whitespace-nowrap text-[var(--l-violet-ink)] uppercase">
-      [Later stage]
-    </span>
-  );
-}
-
 /* ---------------- Card 1: for buyers ---------------- */
 
 function DemoButton() {
@@ -110,58 +102,7 @@ function BuyersCard() {
   );
 }
 
-/* ---------------- Card 2: for teams ---------------- */
-
-const gateways = [
-  { label: "Email read only", icon: "mail", w: 11.667, h: 9.333 },
-  { label: "Calendar sync", icon: "calendar-small", w: 10.5, h: 11.667 },
-  { label: "Files access", icon: "folder", w: 12.542, h: 9.333 },
-];
-
-function TeamsCard() {
-  const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once: true, amount: 0.5 });
-  const [on, setOn] = useState([true, true, true]);
-  return (
-    <Card className="justify-between self-start">
-      <div ref={ref} className="pb-6">
-        <div className="l-inset flex flex-col gap-[10px] p-[17px]">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <p className="text-[12px] leading-4 font-bold text-[var(--l-ink)]">Workspace Gateways</p>
-            <LaterStage />
-          </div>
-          {gateways.map((g, i) => (
-            <button
-              key={g.label}
-              type="button"
-              aria-pressed={on[i]}
-              onClick={() => setOn((s) => s.map((v, j) => (j === i ? !v : v)))}
-              className="l-press flex items-center justify-between rounded-[10px] border border-[var(--l-border)] bg-[var(--l-card)] p-[9px] text-left outline-none hover:border-[rgba(124,92,250,0.35)] focus-visible:ring-2 focus-visible:ring-[var(--l-violet)]"
-            >
-              <span className="flex items-center gap-[6px]">
-                <img src={`/landing/icons/${g.icon}.svg`} alt="" style={{ width: g.w, height: g.h }} />
-                <span className="text-[12px] leading-4 font-medium text-[var(--l-ink-2)]">{g.label}</span>
-              </span>
-              <m.img
-                src="/landing/icons/check-circle.svg"
-                alt={on[i] ? "Allowed" : "Not allowed"}
-                width={12}
-                height={12}
-                className="size-[11.667px]"
-                initial={{ scale: 0 }}
-                animate={{ scale: inView && on[i] ? 1 : 0.0001, opacity: on[i] ? 1 : 0 }}
-                transition={{ type: "spring", stiffness: 500, damping: 15, delay: inView ? 0.25 + i * 0.18 : 0 }}
-              />
-            </button>
-          ))}
-        </div>
-      </div>
-      <CardInfo title="For teams and businesses" body="Admin controls, bulk licensing and invoicing." />
-    </Card>
-  );
-}
-
-/* ---------------- Card 3: for builders ---------------- */
+/* ---------------- Card 2: for builders ---------------- */
 
 const bars = [
   { h: 16, c: "#ddd6fe" },
@@ -222,91 +163,7 @@ function BuildersCard() {
   );
 }
 
-/* ---------------- Card 4: try before you buy ---------------- */
-
-const command = '> agent.execute({ task: "reconcile_receipts", dry_run: true })';
-
-function Typewriter({ text, run, onDone }: { text: string; run: boolean; onDone: () => void }) {
-  const [count, setCount] = useState(0);
-  useEffect(() => {
-    if (!run) return;
-    if (count >= text.length) {
-      onDone();
-      return;
-    }
-    const t = setTimeout(() => setCount((c) => c + 1), count === 0 ? 300 : 28);
-    return () => clearTimeout(t);
-  }, [run, count, text, onDone]);
-  const done = count >= text.length;
-  return (
-    <>
-      <span className="sr-only">{text}</span>
-      <span aria-hidden>
-        {text.slice(0, count)}
-        {!done ? <span className="l-caret">▍</span> : null}
-        {/* Reserve the full height so the card never jumps while typing. */}
-        <span className="invisible">{text.slice(count)}</span>
-      </span>
-    </>
-  );
-}
-
-function SandboxCard() {
-  const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once: true, amount: 0.5 });
-  const [typed, setTyped] = useState(false);
-  const [latency, setLatency] = useState(118);
-  useEffect(() => {
-    if (!typed) return;
-    const t = setInterval(() => setLatency(112 + Math.round(Math.random() * 12)), 1600);
-    return () => clearInterval(t);
-  }, [typed]);
-
-  return (
-    <Card className="gap-8 sm:order-last sm:col-span-2 lg:order-none lg:h-[334.25px] lg:flex-row lg:items-center lg:justify-between">
-      <div ref={ref} className="w-full lg:w-[383.33px] lg:shrink-0">
-        <div className="l-inset flex flex-col gap-3 p-[21px]">
-          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[rgba(229,231,235,0.8)] pb-[9px]">
-            <span className="flex items-center gap-2">
-              <span className="l-ping relative size-[10px] rounded-full bg-[var(--l-green)]" />
-              <span className="text-[12px] leading-4 font-semibold text-[var(--l-ink)]">Disposable Micro-VM Sandbox</span>
-            </span>
-            <span className="l-mono rounded-full border border-[var(--l-border)] bg-[var(--l-card)] px-[9px] py-[3px] text-[11px] leading-[16.5px] whitespace-nowrap text-[var(--l-muted)] tabular-nums">
-              {latency}ms latency
-            </span>
-          </div>
-          <div className="flex items-center justify-between gap-3 rounded-[12px] bg-[var(--l-card)] p-[10px] drop-shadow-[0_1px_1px_rgba(0,0,0,0.05)]">
-            <p className="l-mono min-w-0 text-[12px] leading-4 break-words text-[var(--l-ink)]">
-              <Typewriter text={command} run={inView} onDone={() => setTyped(true)} />
-            </p>
-            <img src="/landing/icons/terminal-small.svg" alt="" width={12} height={10} className="h-[9.333px] w-[11.667px] shrink-0" />
-          </div>
-          <m.div
-            className="rounded-[12px] bg-[var(--l-card)]/70 p-[10px]"
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: typed ? 1 : 0, y: typed ? 0 : 6 }}
-            transition={{ duration: 0.5, ease: EASE }}
-          >
-            <p className="l-mono text-[11px] leading-[16.5px] text-[var(--l-muted)]">
-              {'{ "status": "VERIFIED_ISOLATION",'}
-              <br />
-              {'"taint_checks": 0, "sandbox_id": "vmm-889a" }'}
-            </p>
-          </m.div>
-        </div>
-      </div>
-      <div className="flex max-w-[280px] flex-col gap-[6px]">
-        {/* changed from design: "4.9 / 5 (1,248 reviews)" was a made-up rating; buyer trials aren't built yet. */}
-        <div className="pb-2">
-          <LaterStage />
-        </div>
-        <CardInfo title="Try before you buy" body="Every listing offers a free trial or sandbox run so you inspect before authorizing live credentials." />
-      </div>
-    </Card>
-  );
-}
-
-/* ---------------- Card 5: verified builders ---------------- */
+/* ---------------- Card 3: verified builders ---------------- */
 
 const orbit = [
   { src: "avatar-1", style: { left: "calc(50% - 14px)", top: -4 } },
@@ -384,16 +241,14 @@ export function BuiltForEveryone() {
         </p>
       </m.div>
       <m.div
-        className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3"
+        className="grid grid-cols-1 gap-5 md:grid-cols-3"
         variants={stagger.container}
         initial="hidden"
         whileInView="show"
         viewport={{ once: true, amount: 0.15 }}
       >
         <BuyersCard />
-        <TeamsCard />
         <BuildersCard />
-        <SandboxCard />
         <CommunityCard />
       </m.div>
     </section>
