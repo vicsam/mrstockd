@@ -12,7 +12,8 @@ import type { UpstreamClient } from "./upstream.js";
  * Every call to /v1/tools/:slug/* goes through, in order:
  *
  *   1. API key: parsed, looked up by prefix, verified against its hash
- *   2. Tool:    the key must belong to this listing, and the listing must be live
+ *   2. Tool:    the key must belong to this listing, and the listing must be
+ *               live (sellers' own test keys work at any status)
  *   3. Rate limit per key
  *   4. Access:  subscription still valid, or one credit taken atomically
  *   5. Proxy:   SSRF-guarded call to the seller's endpoint with their
@@ -111,7 +112,9 @@ export function createApp(deps: GatewayDeps) {
     if (listing.id !== key.listingId) {
       return error(c, 403, "key_not_valid_for_tool", "This API key was issued for a different tool.");
     }
-    if (listing.status !== "live") return error(c, 503, "tool_unavailable", "This tool is not currently available.");
+    // Sellers try their own tool with a test key before and during review.
+    const isTest = key.environment === "test";
+    if (!isTest && listing.status !== "live") return error(c, 503, "tool_unavailable", "This tool is not currently available.");
 
     // 3. Rate limit
     const limit = deps.rateLimiter.hit(key.id);
@@ -155,8 +158,10 @@ export function createApp(deps: GatewayDeps) {
         .catch((e) => console.error("usage record failed", e));
     };
 
-    const meterHeaders = (): Record<string, string> =>
-      creditsRemaining === null ? {} : { "X-MrStockd-Credits-Remaining": String(creditsRemaining) };
+    const meterHeaders = (): Record<string, string> => ({
+      ...(creditsRemaining === null ? {} : { "X-MrStockd-Credits-Remaining": String(creditsRemaining) }),
+      ...(isTest ? { "X-MrStockd-Test-Key": "true" } : {}),
+    });
 
     // 5. Proxy
     const subPath = c.req.path.slice(TOOL_PREFIX.length + slug.length);
@@ -174,6 +179,8 @@ export function createApp(deps: GatewayDeps) {
       if (value) headers[name] = value;
     }
     headers["x-mrstockd-request-id"] = c.get("requestId");
+    // Lets the seller tell their own test traffic apart from paying buyers.
+    headers["x-mrstockd-environment"] = key.environment;
     if (listing.upstreamSecretEnc) {
       headers.authorization = `Bearer ${decryptSecret(listing.upstreamSecretEnc, deps.encryptionKey)}`;
     }

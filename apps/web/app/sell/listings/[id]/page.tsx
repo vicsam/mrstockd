@@ -1,4 +1,4 @@
-import { CatalogError } from "@mrstockd/catalog";
+import { CatalogError, TEST_KEY_CREDITS, TEST_KEY_SUBSCRIPTION_HOURS } from "@mrstockd/catalog";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { SiteHeader } from "@/components/site-header";
@@ -8,7 +8,9 @@ import { getCatalog } from "@/lib/catalog";
 import { serverEnv } from "@/lib/server-env";
 import { updateListingAction } from "../../actions";
 import { ListingForm } from "../../listing-form";
+import { Activity } from "./activity";
 import { StatusControls } from "./status-controls";
+import { TestKeyPanel } from "./test-key-panel";
 
 export const metadata: Metadata = { title: "Edit tool · MrStockd" };
 
@@ -33,6 +35,7 @@ export default async function EditListingPage({ params, searchParams }: { params
     throw error;
   }
 
+  const activity = await getCatalog().getToolActivity(session.user.id, listing.id);
   const callUrl = `${serverEnv().GATEWAY_PUBLIC_URL.replace(/\/$/, "")}/v1/tools/${listing.slug}/`;
   const update = updateListingAction.bind(null, listing.id);
 
@@ -89,6 +92,40 @@ export default async function EditListingPage({ params, searchParams }: { params
             <dt className="text-muted">Buyers call it at</dt>
             <dd className="font-mono text-xs break-all">{callUrl}…</dd>
           </dl>
+        </section>
+
+        <section aria-labelledby="try-heading" className="flex flex-col gap-4 rounded-xl border border-current/15 p-5">
+          <div>
+            <h2 id="try-heading" className="font-semibold">
+              Try it through the gateway
+            </h2>
+            <p className="mt-1 text-sm text-muted">
+              A free test key lets you call your own tool exactly the way buyers will, even before it&apos;s approved.{" "}
+              {listing.pricingModel === "credits" ? `It comes with ${TEST_KEY_CREDITS} free calls.` : `It works for ${TEST_KEY_SUBSCRIPTION_HOURS} hours.`}{" "}
+              Only you can use it, and only on this tool.
+            </p>
+          </div>
+          <TestKeyPanel
+            listingId={listing.id}
+            callUrl={callUrl}
+            pricingModel={listing.pricingModel}
+            activeKey={
+              activity.testKey
+                ? {
+                    prefix: activity.testKey.prefix,
+                    creditsRemaining: activity.testKey.creditsRemaining,
+                    validUntil: activity.testKey.validUntil?.toISOString() ?? null,
+                  }
+                : null
+            }
+          />
+        </section>
+
+        <section aria-labelledby="activity-heading" className="flex flex-col gap-4">
+          <h2 id="activity-heading" className="text-xl font-semibold">
+            Calls
+          </h2>
+          <Activity activity={activity} now={new Date()} />
         </section>
 
         <section aria-labelledby="details-heading" className="flex flex-col gap-6">

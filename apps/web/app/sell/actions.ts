@@ -13,6 +13,8 @@ export interface ActionState {
   fieldErrors?: Record<string, string>;
   /** What the user typed, so the form can be refilled after an error. Never includes secrets. */
   values?: Record<string, string>;
+  /** A newly issued test key. Sent to the browser once and never stored in plain text. */
+  testKey?: string;
 }
 
 const LISTING_FIELDS = ["name", "summary", "description", "endpointUrl", "pricingModel", "price", "creditsPerUnit"] as const;
@@ -135,4 +137,26 @@ export async function reviewAction(_prev: ActionState, form: FormData): Promise<
   // The confirmation lives on the queue page itself, so it survives the
   // reviewed item leaving the queue.
   redirect(`/admin/review?${new URLSearchParams({ done: decision, tool: reviewed.name })}`);
+}
+
+/** Creates (or replaces) the seller's test key for their own tool, or stops it. */
+export async function testKeyAction(_prev: ActionState, form: FormData): Promise<ActionState> {
+  const ownerId = await signedInUserId();
+  const listingId = String(form.get("listingId") ?? "");
+  const intent = String(form.get("intent") ?? "");
+  try {
+    if (intent === "create") {
+      const issued = await getCatalog().issueTestKey(ownerId, listingId);
+      revalidatePath(`/sell/listings/${listingId}`);
+      return { ok: true, testKey: issued.key, message: "Test key created. Copy it now: it won't be shown again." };
+    }
+    if (intent === "revoke") {
+      await getCatalog().revokeTestKey(ownerId, listingId);
+      revalidatePath(`/sell/listings/${listingId}`);
+      return { ok: true, message: "Test key stopped. Calls with it are now refused." };
+    }
+    return { error: "Unknown action." };
+  } catch (error) {
+    return toState(error);
+  }
 }

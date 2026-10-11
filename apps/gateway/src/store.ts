@@ -8,6 +8,8 @@ export interface KeyRecord {
   id: string;
   ownerId: string;
   listingId: string;
+  /** "test" keys belong to the tool's own seller and work at any listing status. */
+  environment: "live" | "test";
   keyHash: string;
   creditsRemaining: number;
   validUntil: Date | null;

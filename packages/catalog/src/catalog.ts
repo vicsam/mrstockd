@@ -1,5 +1,5 @@
-import { assertSafeOutboundUrl, encryptSecret, slugify, UnsafeUrlError } from "@mrstockd/core";
-import { and, type AnyDb, auditLog, desc, eq, inArray, listings, or, sellers, sql } from "@mrstockd/db";
+import { assertSafeOutboundUrl, encryptSecret, generateApiKey, slugify, UnsafeUrlError } from "@mrstockd/core";
+import { and, type AnyDb, apiKeys, auditLog, desc, eq, gte, inArray, isNull, listings, or, sellers, sql, usageEvents } from "@mrstockd/db";
 import { CatalogError } from "./errors.js";
 import { type ListingAction, type ListingStatus, nextStatus } from "./lifecycle.js";
 import { listingInputSchema, type ListingInput, parseOrThrow, sellerInputSchema, type SellerInput } from "./validation.js";
@@ -40,6 +40,45 @@ export interface SellerListing extends Omit<PublicListing, "sellerName"> {
   endpointUrl: string;
   hasSecret: boolean;
   updatedAt: Date;
+}
+
+/** Free credits on a seller's test key (credit-pack tools). */
+export const TEST_KEY_CREDITS = 50;
+/** How long a seller's test key works on a subscription tool. */
+export const TEST_KEY_SUBSCRIPTION_HOURS = 24;
+/** Test keys a seller can create per tool per day, so free calls can't be farmed. */
+export const TEST_KEYS_PER_DAY = 20;
+
+/** Returned once, at creation. The full key is never stored or shown again. */
+export interface IssuedTestKey {
+  key: string;
+  prefix: string;
+  creditsRemaining: number;
+  validUntil: Date | null;
+}
+
+export interface TestKeySummary {
+  prefix: string;
+  creditsRemaining: number;
+  validUntil: Date | null;
+  createdAt: Date;
+  lastUsedAt: Date | null;
+}
+
+export interface ToolCall {
+  at: Date;
+  statusCode: number;
+  latencyMs: number;
+  creditsUsed: number;
+  environment: "live" | "test";
+}
+
+/** What a seller sees about calls to their own tool. */
+export interface ToolActivity {
+  testKey: TestKeySummary | null;
+  last24h: { calls: number; testCalls: number; failures: number; avgLatencyMs: number | null };
+  allTimeCalls: number;
+  recent: ToolCall[];
 }
 
 export interface SearchResult {
@@ -267,6 +306,122 @@ export function createCatalog(deps: CatalogDeps) {
         .where(and(eq(listings.id, current.id), eq(listings.status, current.status)));
       await audit(ownerId, "user", `listing.${action}`, current.id, { from: current.status, to });
       return this.getMyListing(ownerId, listingId);
+    },
+
+    /* --------------------- Seller's test key + usage -------------------- */
+
+    /**
+     * Gives the seller a free key for their own tool, so they can call it
+     * through the gateway before buyers can. Any earlier test key for the
+     * tool stops working: there is one active test key per tool.
+     */
+    async issueTestKey(ownerId: string, listingId: string): Promise<IssuedTestKey> {
+      const listing = await ownedListing(ownerId, listingId);
+      const at = now();
+      const dayAgo = new Date(at.getTime() - 24 * 60 * 60 * 1000);
+      const [{ count } = { count: 0 }] = await db
+        .select({ count: sql<number>`count(*)::int` })
+        .from(apiKeys)
+        .where(and(eq(apiKeys.listingId, listing.id), eq(apiKeys.ownerId, ownerId), eq(apiKeys.environment, "test"), gte(apiKeys.createdAt, dayAgo)));
+      if (count >= TEST_KEYS_PER_DAY) {
+        throw new CatalogError("limit_reached", "You've made a lot of test keys today. Use your current one, or try again tomorrow.");
+      }
+
+      const issued = generateApiKey("test");
+      const subscription = listing.pricingModel === "subscription";
+      const creditsRemaining = subscription ? 0 : TEST_KEY_CREDITS;
+      const validUntil = subscription ? new Date(at.getTime() + TEST_KEY_SUBSCRIPTION_HOURS * 60 * 60 * 1000) : null;
+
+      await db.transaction(async (tx) => {
+        await tx
+          .update(apiKeys)
+          .set({ revokedAt: at, updatedAt: at })
+          .where(and(eq(apiKeys.listingId, listing.id), eq(apiKeys.ownerId, ownerId), eq(apiKeys.environment, "test"), isNull(apiKeys.revokedAt)));
+        await tx.insert(apiKeys).values({
+          ownerId,
+          listingId: listing.id,
+          environment: "test",
+          prefix: issued.prefix,
+          keyHash: issued.hash,
+          creditsRemaining,
+          validUntil,
+        });
+      });
+      await audit(ownerId, "user", "test_key.issued", listing.id, { prefix: issued.prefix });
+      return { key: issued.key, prefix: issued.prefix, creditsRemaining, validUntil };
+    },
+
+    /** Stops the seller's current test key for this tool, if there is one. */
+    async revokeTestKey(ownerId: string, listingId: string): Promise<void> {
+      const listing = await ownedListing(ownerId, listingId);
+      const at = now();
+      const revoked = await db
+        .update(apiKeys)
+        .set({ revokedAt: at, updatedAt: at })
+        .where(and(eq(apiKeys.listingId, listing.id), eq(apiKeys.ownerId, ownerId), eq(apiKeys.environment, "test"), isNull(apiKeys.revokedAt)))
+        .returning({ prefix: apiKeys.prefix });
+      if (revoked.length) await audit(ownerId, "user", "test_key.revoked", listing.id, { prefix: revoked[0]!.prefix });
+    },
+
+    /** Calls to the seller's own tool: their test key, last-day totals, and recent calls. */
+    async getToolActivity(ownerId: string, listingId: string): Promise<ToolActivity> {
+      const listing = await ownedListing(ownerId, listingId);
+      const dayAgo = new Date(now().getTime() - 24 * 60 * 60 * 1000);
+
+      const [testKey] = await db
+        .select({
+          prefix: apiKeys.prefix,
+          creditsRemaining: apiKeys.creditsRemaining,
+          validUntil: apiKeys.validUntil,
+          createdAt: apiKeys.createdAt,
+          lastUsedAt: apiKeys.lastUsedAt,
+        })
+        .from(apiKeys)
+        .where(and(eq(apiKeys.listingId, listing.id), eq(apiKeys.ownerId, ownerId), eq(apiKeys.environment, "test"), isNull(apiKeys.revokedAt)))
+        .orderBy(desc(apiKeys.createdAt))
+        .limit(1);
+
+      const [day] = await db
+        .select({
+          calls: sql<number>`count(*)::int`,
+          testCalls: sql<number>`count(*) filter (where ${apiKeys.environment} = 'test')::int`,
+          failures: sql<number>`count(*) filter (where ${usageEvents.statusCode} >= 500)::int`,
+          avgLatencyMs: sql<number | null>`round(avg(${usageEvents.latencyMs}))::int`,
+        })
+        .from(usageEvents)
+        .innerJoin(apiKeys, eq(apiKeys.id, usageEvents.apiKeyId))
+        .where(and(eq(usageEvents.listingId, listing.id), gte(usageEvents.createdAt, dayAgo)));
+
+      const [all] = await db
+        .select({ calls: sql<number>`count(*)::int` })
+        .from(usageEvents)
+        .where(eq(usageEvents.listingId, listing.id));
+
+      const recent = await db
+        .select({
+          at: usageEvents.createdAt,
+          statusCode: usageEvents.statusCode,
+          latencyMs: usageEvents.latencyMs,
+          creditsUsed: usageEvents.creditsUsed,
+          environment: apiKeys.environment,
+        })
+        .from(usageEvents)
+        .innerJoin(apiKeys, eq(apiKeys.id, usageEvents.apiKeyId))
+        .where(eq(usageEvents.listingId, listing.id))
+        .orderBy(desc(usageEvents.createdAt))
+        .limit(10);
+
+      return {
+        testKey: testKey ?? null,
+        last24h: {
+          calls: day?.calls ?? 0,
+          testCalls: day?.testCalls ?? 0,
+          failures: day?.failures ?? 0,
+          avgLatencyMs: day?.avgLatencyMs ?? null,
+        },
+        allTimeCalls: all?.calls ?? 0,
+        recent,
+      };
     },
 
     /* ---------------------------- Review ----------------------------- */

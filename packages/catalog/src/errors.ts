@@ -4,7 +4,8 @@ export type CatalogErrorCode =
   | "not_a_seller"
   | "already_a_seller"
   | "invalid_transition"
-  | "unsafe_endpoint";
+  | "unsafe_endpoint"
+  | "limit_reached";
 
 /**
  * Expected, user-facing failures. Anything else thrown from the catalog is a

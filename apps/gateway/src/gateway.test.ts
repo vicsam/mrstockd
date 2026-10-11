@@ -82,13 +82,18 @@ async function seed() {
   for (const r of rows) ids[r.slug] = r.id;
 }
 
-async function issueKey(slug: string, opts: { credits?: number; validUntil?: Date; revoked?: boolean } = {}) {
-  const issued = generateApiKey("test");
+async function issueKey(
+  slug: string,
+  opts: { credits?: number; validUntil?: Date; revoked?: boolean; environment?: "live" | "test" } = {},
+) {
+  const environment = opts.environment ?? "live";
+  const issued = generateApiKey(environment);
   const [row] = await testDb.db
     .insert(apiKeys)
     .values({
       ownerId: "buyer-user",
       listingId: ids[slug]!,
+      environment,
       prefix: issued.prefix,
       keyHash: issued.hash,
       creditsRemaining: opts.credits ?? 0,
@@ -175,6 +180,24 @@ describe("authentication", () => {
     const { key } = await issueKey("draft-tool", { credits: 5 });
     expect((await call(makeApp(), "/v1/tools/draft-tool/run", key)).status).toBe(503);
   });
+
+  it("lets the seller's test key call a tool that isn't live yet, and tells the seller it's a test", async () => {
+    const { key, id } = await issueKey("draft-tool", { credits: 2, environment: "test" });
+    const res = await call(makeApp(), "/v1/tools/draft-tool/run", key);
+    expect(res.status).toBe(200);
+    expect(res.headers.get("x-mrstockd-test-key")).toBe("true");
+    expect(res.headers.get("x-mrstockd-credits-remaining")).toBe("1");
+    const echo = (await res.json()) as { headers: Record<string, string> };
+    expect(echo.headers["x-mrstockd-environment"]).toBe("test");
+    expect(await creditsOf(id)).toBe(1);
+  });
+
+  it("still limits test keys to their own tool and their credits", async () => {
+    const { key } = await issueKey("draft-tool", { credits: 1, environment: "test" });
+    expect((await call(makeApp(), "/v1/tools/invoice-extractor/run", key)).status).toBe(403);
+    expect((await call(makeApp(), "/v1/tools/draft-tool/run", key)).status).toBe(200);
+    expect((await call(makeApp(), "/v1/tools/draft-tool/run", key)).status).toBe(402);
+  });
 });
 
 describe("proxying a paid call", () => {
@@ -201,6 +224,7 @@ describe("proxying a paid call", () => {
     expect(JSON.stringify(echo.headers)).not.toContain(key);
     expect(echo.headers.cookie).toBeUndefined();
     expect(echo.headers["x-mrstockd-request-id"]).toBeTruthy();
+    expect(echo.headers["x-mrstockd-environment"]).toBe("live");
 
     expect(await creditsOf(id)).toBe(2);
     const usage = await usageFor(id);

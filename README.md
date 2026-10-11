@@ -70,7 +70,7 @@ cp .env.example .env
 sed -i "s|^BETTER_AUTH_SECRET=.*|BETTER_AUTH_SECRET=$(openssl rand -base64 32)|" .env
 sed -i "s|^UPSTREAM_SECRET_ENCRYPTION_KEY=.*|UPSTREAM_SECRET_ENCRYPTION_KEY=$(openssl rand -base64 32)|" .env
 
-pnpm db:migrate               # creates the pgvector extension and all tables
+pnpm db:migrate               # creates the pgvector extension and all tables (rerun after pulling)
 pnpm dev                      # builds shared packages, then runs every app
 ```
 
@@ -106,7 +106,26 @@ Rules the catalog enforces:
 - Sellers can only see and change their own listings; anyone else's look like they don't exist.
 - The seller's endpoint and secret are never shown publicly. The secret is encrypted and never shown again, even to the seller.
 
-Local tip: add your own email to `ADMIN_EMAILS` in `.env` to review your own test listings.
+Local tip: add your own email to `ADMIN_EMAILS` in `.env`, then restart `pnpm dev`, to review your own test listings.
+
+### Trying your tool before buyers can
+
+Each tool's page has a **Try it through the gateway** panel. It gives the seller a free test key (`mrs_test_…`) that:
+
+- works only on that seller's own tool, at any status (draft, in review, live), so you can test before approval;
+- comes with 50 free calls (or 24 hours for a monthly plan); creating a new key stops the old one, and you can make up to 20 a day;
+- is marked on every call: the seller's endpoint receives `X-MrStockd-Environment: test`, and the response carries `X-MrStockd-Test-Key: true`.
+
+The panel shows a ready-to-paste `curl` command, and a **Calls** section lists recent calls with status, response time and credits used.
+
+To get something to call while developing, run the bundled sample tool (no dependencies):
+
+```bash
+pnpm sample-tool                              # http://localhost:4000
+SAMPLE_TOOL_SECRET=abc123 pnpm sample-tool    # also require a secret
+```
+
+List it with the endpoint `http://localhost:4000/api` (and the same secret, if you set one). It summarises any text you POST as `{"text": "..."}`.
 
 ## Calling a tool through the gateway
 
@@ -127,6 +146,7 @@ The gateway checks the key, the tool, the rate limit, and the buyer's credits or
 | `401 invalid_api_key` / `api_key_revoked` | Missing, wrong, or revoked key |
 | `402 insufficient_credits` / `subscription_inactive` | Buy more credits or renew |
 | `403 key_not_valid_for_tool` | The key belongs to a different tool |
+| `503 tool_unavailable` | The tool isn't live (paused or not yet approved). Sellers' test keys still work. |
 | `429 rate_limited` | Too many calls; wait for `Retry-After` seconds |
 | `502` / `504` | The seller's tool failed, timed out, or tried to redirect. No credit is charged. |
 

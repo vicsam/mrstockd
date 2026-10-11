@@ -123,11 +123,19 @@ export const agents = pgTable("agents", {
   ...timestamps,
 });
 
+/**
+ * live: issued by a purchase; works only while the tool is live.
+ * test: issued free to a tool's own seller so they can try it through the
+ * gateway at any status; a few credits, one active key per tool.
+ */
+export const keyEnvironment = pgEnum("key_environment", ["live", "test"]);
+
 export const apiKeys = pgTable("api_keys", {
   id: uuid("id").primaryKey().defaultRandom(),
   ownerId: text("owner_id").notNull(),
   listingId: uuid("listing_id").notNull().references(() => listings.id),
   orderId: uuid("order_id").references(() => orders.id),
+  environment: keyEnvironment("environment").notNull().default("live"),
   prefix: text("prefix").notNull(),
   /** SHA-256 of the full key. The key itself is never stored. */
   keyHash: text("key_hash").notNull(),
@@ -141,6 +149,7 @@ export const apiKeys = pgTable("api_keys", {
 }, (t) => [
   uniqueIndex("api_keys_prefix_idx").on(t.prefix),
   index("api_keys_owner_idx").on(t.ownerId),
+  index("api_keys_listing_idx").on(t.listingId),
 ]);
 
 export const usageEvents = pgTable("usage_events", {

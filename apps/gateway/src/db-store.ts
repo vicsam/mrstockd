@@ -10,6 +10,7 @@ export function createDbStore(db: AnyDb): GatewayStore {
           id: apiKeys.id,
           ownerId: apiKeys.ownerId,
           listingId: apiKeys.listingId,
+          environment: apiKeys.environment,
           keyHash: apiKeys.keyHash,
           creditsRemaining: apiKeys.creditsRemaining,
           validUntil: apiKeys.validUntil,

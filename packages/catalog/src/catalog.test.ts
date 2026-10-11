@@ -1,9 +1,10 @@
 import { randomBytes } from "node:crypto";
 import { decryptSecret, parseEncryptionKey } from "@mrstockd/core";
-import { auditLog, eq, listings } from "@mrstockd/db";
+import { apiKeys, auditLog, eq, listings, usageEvents } from "@mrstockd/db";
 import { createTestDb } from "@mrstockd/db/testing";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { type Catalog, CatalogError, createCatalog, type ListingInput, parsePriceToCents } from "./index.js";
+import { hashApiKey } from "@mrstockd/core";
+import { type Catalog, CatalogError, createCatalog, type ListingInput, parsePriceToCents, TEST_KEY_CREDITS, TEST_KEYS_PER_DAY } from "./index.js";
 
 const key = parseEncryptionKey(randomBytes(32).toString("base64"));
 let testDb: Awaited<ReturnType<typeof createTestDb>>;
@@ -270,5 +271,79 @@ describe("search", () => {
 
   it("caps page size", async () => {
     expect((await catalog.search({ limit: 1000 })).items.length).toBeLessThanOrEqual(50);
+  });
+});
+
+describe("seller test keys", () => {
+  async function draftListing(ownerId: string, input: Partial<ListingInput> = {}) {
+    if (!(await catalog.getSeller(ownerId))) await catalog.becomeSeller(ownerId, { displayName: `Seller ${ownerId}` });
+    return catalog.createListing(ownerId, listingInput(input));
+  }
+
+  it("issues a test key with free credits, stored only as a hash", async () => {
+    const listing = await draftListing("tk-seller-1");
+    const issued = await catalog.issueTestKey("tk-seller-1", listing.id);
+    expect(issued.key).toMatch(/^mrs_test_[a-f0-9]{12}_/);
+    expect(issued.creditsRemaining).toBe(TEST_KEY_CREDITS);
+
+    const [row] = await testDb.db.select().from(apiKeys).where(eq(apiKeys.prefix, issued.prefix));
+    expect(row!.environment).toBe("test");
+    expect(row!.ownerId).toBe("tk-seller-1");
+    expect(row!.keyHash).toBe(hashApiKey(issued.key));
+    expect(JSON.stringify(row)).not.toContain(issued.key);
+  });
+
+  it("keeps one active test key per tool: a new one stops the old one", async () => {
+    const listing = await draftListing("tk-seller-2");
+    const first = await catalog.issueTestKey("tk-seller-2", listing.id);
+    const second = await catalog.issueTestKey("tk-seller-2", listing.id);
+    const rows = await testDb.db.select().from(apiKeys).where(eq(apiKeys.listingId, listing.id));
+    expect(rows.find((r) => r.prefix === first.prefix)!.revokedAt).not.toBeNull();
+    expect(rows.find((r) => r.prefix === second.prefix)!.revokedAt).toBeNull();
+    expect((await catalog.getToolActivity("tk-seller-2", listing.id)).testKey?.prefix).toBe(second.prefix);
+  });
+
+  it("gives subscription tools a time-limited key instead of credits", async () => {
+    const listing = await draftListing("tk-seller-3", { pricingModel: "subscription" });
+    const issued = await catalog.issueTestKey("tk-seller-3", listing.id);
+    expect(issued.creditsRemaining).toBe(0);
+    expect(issued.validUntil!.getTime()).toBeGreaterThan(Date.now());
+  });
+
+  it("never issues, revokes, or shows activity for someone else's tool", async () => {
+    const listing = await draftListing("tk-seller-4");
+    await catalog.issueTestKey("tk-seller-4", listing.id);
+    await expectCatalogError(catalog.issueTestKey("intruder", listing.id), "not_found");
+    await expectCatalogError(catalog.revokeTestKey("intruder", listing.id), "not_found");
+    await expectCatalogError(catalog.getToolActivity("intruder", listing.id), "not_found");
+    expect((await catalog.getToolActivity("tk-seller-4", listing.id)).testKey).not.toBeNull();
+  });
+
+  it("revokes the current test key", async () => {
+    const listing = await draftListing("tk-seller-5");
+    await catalog.issueTestKey("tk-seller-5", listing.id);
+    await catalog.revokeTestKey("tk-seller-5", listing.id);
+    expect((await catalog.getToolActivity("tk-seller-5", listing.id)).testKey).toBeNull();
+  });
+
+  it("caps how many test keys a seller can make per tool per day", async () => {
+    const listing = await draftListing("tk-seller-6");
+    for (let i = 0; i < TEST_KEYS_PER_DAY; i++) await catalog.issueTestKey("tk-seller-6", listing.id);
+    await expectCatalogError(catalog.issueTestKey("tk-seller-6", listing.id), "limit_reached");
+  });
+
+  it("summarises calls to the tool, telling test calls and failures apart", async () => {
+    const listing = await draftListing("tk-seller-7");
+    const issued = await catalog.issueTestKey("tk-seller-7", listing.id);
+    const [key] = await testDb.db.select().from(apiKeys).where(eq(apiKeys.prefix, issued.prefix));
+    await testDb.db.insert(usageEvents).values([
+      { apiKeyId: key!.id, listingId: listing.id, statusCode: 200, latencyMs: 100, creditsUsed: 1 },
+      { apiKeyId: key!.id, listingId: listing.id, statusCode: 502, latencyMs: 300, creditsUsed: 0 },
+    ]);
+    const activity = await catalog.getToolActivity("tk-seller-7", listing.id);
+    expect(activity.last24h).toEqual({ calls: 2, testCalls: 2, failures: 1, avgLatencyMs: 200 });
+    expect(activity.allTimeCalls).toBe(2);
+    expect(activity.recent).toHaveLength(2);
+    expect(activity.recent[0]!.environment).toBe("test");
   });
 });
