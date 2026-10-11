@@ -14,20 +14,41 @@ export interface AuthOptions {
   production?: boolean;
   /** Framework-specific plugins appended last (e.g. Next.js cookie handling). */
   extraPlugins?: BetterAuthPlugin[];
+  /** Sign in with Google or Apple. Each is turned on only when its credentials are given. */
+  social?: SocialProviders;
+  /** Sends the "reset your password" email. Without it, password reset is unavailable. */
+  sendResetPasswordEmail?: (message: { to: string; name: string; url: string }) => Promise<void>;
 }
 
-export const PASSWORD_MIN_LENGTH = 10;
+export interface SocialProviders {
+  google?: { clientId: string; clientSecret: string };
+  /** clientSecret is the signed JWT Apple issues for "Sign in with Apple" on the web. */
+  apple?: { clientId: string; clientSecret: string };
+}
+
+/** Which social sign-in buttons to show, so the UI never offers one that isn't configured. */
+export function enabledSocialProviders(social: SocialProviders | undefined): ("google" | "apple")[] {
+  return (["google", "apple"] as const).filter((p) => Boolean(social?.[p]?.clientId && social[p]?.clientSecret));
+}
+
+import { RESET_LINK_MINUTES, SESSION_DAYS, PASSWORD_MIN_LENGTH } from "./constants.js";
+
+export * from "./constants.js";
 
 export function createAuth(options: AuthOptions) {
   if (options.secret.length < 32) {
     throw new Error("BETTER_AUTH_SECRET must be at least 32 characters (openssl rand -base64 32).");
   }
 
+  const social = enabledSocialProviders(options.social);
+  const sendReset = options.sendResetPasswordEmail;
+
   return betterAuth({
     appName: "MrStockd",
     secret: options.secret,
     baseURL: options.baseURL,
-    trustedOrigins: options.trustedOrigins ?? [],
+    // Apple posts its sign-in response back from its own origin.
+    trustedOrigins: [...(options.trustedOrigins ?? []), ...(social.includes("apple") ? ["https://appleid.apple.com"] : [])],
     database: drizzleAdapter(options.db, { provider: "pg", schema: authSchema }),
 
     emailAndPassword: {
@@ -38,10 +59,20 @@ export function createAuth(options: AuthOptions) {
       // Email verification is switched on once transactional email (Resend) is wired.
       requireEmailVerification: false,
       revokeSessionsOnPasswordReset: true,
+      resetPasswordTokenExpiresIn: RESET_LINK_MINUTES * 60,
+      ...(sendReset
+        ? {
+            sendResetPassword: async ({ user, url }: { user: { email: string; name: string }; url: string }) => {
+              await sendReset({ to: user.email, name: user.name, url });
+            },
+          }
+        : {}),
     },
 
+    socialProviders: Object.fromEntries(social.map((p) => [p, options.social![p]!])),
+
     session: {
-      expiresIn: 60 * 60 * 24 * 7, // 7 days
+      expiresIn: 60 * 60 * 24 * SESSION_DAYS,
       updateAge: 60 * 60 * 24, // refresh expiry at most once a day
       cookieCache: { enabled: true, maxAge: 5 * 60 },
     },

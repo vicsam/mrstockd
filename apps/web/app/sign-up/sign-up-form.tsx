@@ -2,7 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { type FormEvent, useState } from "react";
-import { Field, FormError, SubmitButton } from "@/components/form";
+import { FormAlert, PasswordField, PrimaryButton, TextField } from "@/components/auth/fields";
+import { SocialButtons } from "@/components/auth/social-buttons";
 import { authClient } from "@/lib/auth-client";
 import { useHydrated } from "@/lib/use-hydrated";
 
@@ -25,7 +26,7 @@ function signUpErrorMessage(status: number, code?: string): string {
   }
 }
 
-export function SignUpForm() {
+export function SignUpForm({ providers }: { providers: ("google" | "apple")[] }) {
   const router = useRouter();
   const hydrated = useHydrated();
   const [pending, setPending] = useState(false);
@@ -48,31 +49,37 @@ export function SignUpForm() {
       email: String(form.get("email")).trim(),
       password,
     });
-    setPending(false);
     if (error) {
+      setPending(false);
       setError(signUpErrorMessage(error.status, error.code));
       return;
     }
-    router.push("/account");
+    // New accounts pick what they want to automate first.
+    router.push("/welcome");
     router.refresh();
   }
 
   return (
-    <form method="post" onSubmit={onSubmit} className="flex flex-col gap-5" noValidate>
-      <FormError message={error} />
-      <Field label="Name" name="name" autoComplete="name" required />
-      <Field label="Email" name="email" type="email" autoComplete="email" inputMode="email" required />
-      <Field
-        label="Password"
-        name="password"
-        type="password"
-        autoComplete="new-password"
-        minLength={MIN_PASSWORD}
-        hint={`At least ${MIN_PASSWORD} characters.`}
-        error={passwordError}
-        required
-      />
-      <SubmitButton pending={pending} ready={hydrated}>{pending ? "Creating account…" : "Create account"}</SubmitButton>
-    </form>
+    <div className="flex flex-col gap-6">
+      <form method="post" onSubmit={onSubmit} className="flex flex-col gap-5" noValidate>
+        <FormAlert message={error} />
+        <TextField label="Full name" name="name" autoComplete="name" placeholder="Ada Lovelace" required />
+        <TextField label="Email address" name="email" type="email" autoComplete="email" inputMode="email" placeholder="ada@company.com" required />
+        <PasswordField
+          label="Password"
+          name="password"
+          autoComplete="new-password"
+          minLength={MIN_PASSWORD}
+          placeholder="Choose a password"
+          labelAside={<span className="text-[12px] font-medium text-[var(--l-muted)]">{MIN_PASSWORD}+ characters</span>}
+          error={passwordError}
+          required
+        />
+        <PrimaryButton pending={pending} ready={hydrated}>
+          {pending ? "Creating your account…" : "Continue"}
+        </PrimaryButton>
+      </form>
+      <SocialButtons providers={providers} dividerLabel="OR CONTINUE WITH" />
+    </div>
   );
 }

@@ -1,4 +1,4 @@
-import { type Analytics, type Catalog, createAnalytics, createCatalog } from "@mrstockd/catalog";
+import { type Analytics, type Catalog, createAnalytics, createCatalog, createInterests, type Interests } from "@mrstockd/catalog";
 import { parseEncryptionKey } from "@mrstockd/core";
 import { getDb, serverEnv } from "./server-env";
 
@@ -21,4 +21,12 @@ let analytics: Analytics | undefined;
 export function getAnalytics(): Analytics {
   analytics ??= createAnalytics({ db: getDb() });
   return analytics;
+}
+
+let interests: Interests | undefined;
+
+/** Onboarding topics each user picked. */
+export function getInterests(): Interests {
+  interests ??= createInterests({ db: getDb() });
+  return interests;
 }

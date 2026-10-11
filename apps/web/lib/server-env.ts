@@ -15,6 +15,15 @@ const schema = z.object({
   /** Public base URL of the gateway, shown to sellers and buyers. */
   GATEWAY_PUBLIC_URL: z.url().default("http://localhost:8787"),
   GATEWAY_ALLOW_PRIVATE_UPSTREAMS: z.enum(["true", "false"]).default("false"),
+  /** Sign in with Google: https://console.cloud.google.com/apis/credentials (optional). */
+  GOOGLE_CLIENT_ID: z.string().default(""),
+  GOOGLE_CLIENT_SECRET: z.string().default(""),
+  /** Sign in with Apple: a Services ID and its signed client-secret JWT (optional). */
+  APPLE_CLIENT_ID: z.string().default(""),
+  APPLE_CLIENT_SECRET: z.string().default(""),
+  /** Transactional email through Resend. Without it, emails are printed to the server log in development. */
+  RESEND_API_KEY: z.string().default(""),
+  EMAIL_FROM: z.string().default("MrStockd <onboarding@resend.dev>"),
 });
 
 export type ServerEnv = z.infer<typeof schema>;

@@ -182,3 +182,13 @@ export const auditLog = pgTable("audit_log", {
   metadata: jsonb("metadata"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [index("audit_log_subject_idx").on(t.subjectType, t.subjectId)]);
+
+/**
+ * What a person told us they want to automate, picked during onboarding.
+ * Used to tailor their tool recommendations. One row per user.
+ */
+export const userInterests = pgTable("user_interests", {
+  userId: text("user_id").primaryKey(),
+  topics: text("topics").array().notNull().default(sql`'{}'::text[]`),
+  ...timestamps,
+});

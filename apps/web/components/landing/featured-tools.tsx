@@ -3,8 +3,9 @@
 import { m } from "motion/react";
 import { EASE, spotlight, stagger } from "./motion";
 
-/** The few listing fields the landing page shows. Built on the server from live listings. */
-export type FeaturedTool = { slug: string; name: string; summary: string; price: string; sellerName: string };
+import type { ToolSummary } from "@/lib/marketplace";
+
+export type FeaturedTool = ToolSummary;
 
 /**
  * Real tools from the store, newest first. Replaces the design's tester quotes: live listings say more

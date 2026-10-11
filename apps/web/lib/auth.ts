@@ -1,7 +1,8 @@
-import { createAuth, type Auth } from "@mrstockd/auth";
+import { createAuth, enabledSocialProviders, RESET_LINK_MINUTES, type Auth, type SocialProviders } from "@mrstockd/auth";
 import { nextCookies } from "better-auth/next-js";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { resetPasswordEmail, sendEmail } from "./email";
 import { getDb, serverEnv } from "./server-env";
 
 let instance: Auth | undefined;
@@ -19,8 +20,27 @@ export function getAuth(): Auth {
     baseURL: env.BETTER_AUTH_URL,
     production: env.NODE_ENV === "production",
     extraPlugins: [nextCookies()],
+    social: socialConfig(),
+    sendResetPasswordEmail: async ({ to, name, url }) => sendEmail(resetPasswordEmail({ to, name, url, minutes: RESET_LINK_MINUTES })),
   });
   return instance;
+}
+
+function socialConfig(): SocialProviders {
+  const env = serverEnv();
+  return {
+    google: { clientId: env.GOOGLE_CLIENT_ID, clientSecret: env.GOOGLE_CLIENT_SECRET },
+    apple: { clientId: env.APPLE_CLIENT_ID, clientSecret: env.APPLE_CLIENT_SECRET },
+  };
+}
+
+/** Social sign-in buttons to show. Empty when none are configured, or env can't be read at build time. */
+export function socialSignInOptions(): ("google" | "apple")[] {
+  try {
+    return enabledSocialProviders(socialConfig());
+  } catch {
+    return [];
+  }
 }
 
 /** The signed-in user's session for the current request, or null. */
