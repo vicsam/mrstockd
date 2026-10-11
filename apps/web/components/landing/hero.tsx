@@ -15,7 +15,7 @@ function PhotoCard({ card, index, sizes = "119px", className = "" }: { card: Car
     <m.div
       whileHover={{ scale: 1.05, rotate: index % 2 ? 1.5 : -1.5, zIndex: 5 }}
       transition={{ type: "spring", stiffness: 300, damping: 20 }}
-      className={`group relative flex h-[168px] w-[135px] flex-col overflow-clip rounded-[20px] border-2 border-white bg-white p-2 shadow-[0_8px_24px_rgba(13,12,34,0.08)] hover:shadow-[0_20px_40px_rgba(13,12,34,0.16)] dark:border-[#1a1930] dark:bg-[#1a1930] ${className}`}
+      className={`group relative flex h-[168px] w-[135px] flex-col overflow-clip rounded-[20px] border-2 border-white bg-white p-2 shadow-[0_8px_24px_rgba(13,12,34,0.08)] hover:shadow-[0_20px_40px_rgba(13,12,34,0.16)] ${className}`}
     >
       <div className="relative min-h-px flex-1 overflow-hidden rounded-[16px]">
         <Image
@@ -146,6 +146,14 @@ export function Hero() {
             </m.div>
           </div>
 
+          <p
+            style={{ animationDelay: "0.15s" }}
+            className="l-in-fade mb-5 inline-flex items-center gap-2 rounded-full border border-[var(--l-hairline)] bg-[var(--l-card)] px-3 py-1.5 text-[12px] leading-4 font-semibold text-[var(--l-ink-2)] shadow-[0_1px_2px_rgba(13,12,34,0.06)]"
+          >
+            <span className="size-1.5 rounded-full bg-[var(--l-brand)]" aria-hidden />
+            {hero.eyebrow}
+          </p>
+
           <h1 id="hero-title" className="text-[clamp(40px,9vw,64px)] leading-[1.05] font-bold tracking-[-0.03em] text-[var(--l-ink)]">
             {words.map(({ w, key, br }, i) => (
               <span key={key}>
@@ -169,12 +177,12 @@ export function Hero() {
 
           <p
             style={{ animationDelay: "0.5s" }}
-            className="l-in-fade mt-0 max-w-[480px] px-[12.8px] pt-0 pb-8 text-[16px] leading-[26px] tracking-[-0.16px] text-[var(--l-muted)]"
+            className="l-in-fade mt-4 max-w-[540px] px-[12.8px] pt-0 pb-8 text-[16px] leading-[26px] tracking-[-0.16px] text-[var(--l-muted)]"
           >
             {hero.subtitle}
           </p>
 
-          <div className="l-in-fade" style={{ animationDelay: "0.65s" }}>
+          <div className="l-in-fade flex flex-col items-center gap-3 sm:flex-row sm:gap-5" style={{ animationDelay: "0.65s" }}>
             <Magnetic>
               <a
                 href={hero.cta.href}
@@ -184,7 +192,20 @@ export function Hero() {
                 <img src="/landing/icons/hero-arrow.svg" alt="" width={12} height={12} className="size-3 transition-transform duration-300 group-hover:translate-x-1" />
               </a>
             </Magnetic>
+            <a
+              href={hero.secondary.href}
+              className="l-press group flex h-12 items-center gap-2 rounded-full border border-[var(--l-hairline)] bg-[var(--l-card)] px-6 text-[14px] leading-[18px] font-semibold tracking-[0.14px] text-[var(--l-ink)] shadow-[0_1px_2px_rgba(13,12,34,0.06)] outline-none hover:border-[rgba(175,26,93,0.3)] hover:text-[var(--l-brand-text)] focus-visible:ring-2 focus-visible:ring-[#7c5cfa] focus-visible:ring-offset-2"
+            >
+              {hero.secondary.label}
+            </a>
           </div>
+          <a
+            href="#how-it-works"
+            style={{ animationDelay: "0.8s" }}
+            className="l-in-fade mt-6 text-[13px] leading-5 font-medium text-[var(--l-muted)] underline decoration-[var(--l-hairline)] underline-offset-4 outline-none hover:text-[var(--l-ink)] hover:decoration-current focus-visible:text-[var(--l-ink)]"
+          >
+            New here? See how it works
+          </a>
         </div>
       </div>
       <PhotoMarquee />

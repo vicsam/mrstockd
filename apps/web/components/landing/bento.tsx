@@ -266,7 +266,7 @@ function SandboxCard() {
     <Card className="gap-8 sm:order-last sm:col-span-2 lg:order-none lg:h-[334.25px] lg:flex-row lg:items-center lg:justify-between">
       <div ref={ref} className="w-full lg:w-[383.33px] lg:shrink-0">
         <div className="l-inset flex flex-col gap-3 p-[21px]">
-          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[rgba(229,231,235,0.8)] pb-[9px] dark:border-white/10">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[rgba(229,231,235,0.8)] pb-[9px]">
             <span className="flex items-center gap-2">
               <span className="l-ping relative size-[10px] rounded-full bg-[var(--l-green)]" />
               <span className="text-[12px] leading-4 font-semibold text-[var(--l-ink)]">Disposable Micro-VM Sandbox</span>
@@ -323,7 +323,7 @@ function CommunityCard() {
         <div className="relative flex h-[144px] items-center justify-center">
           <m.div
             aria-hidden
-            className="absolute top-4 left-1/2 size-[112px] -translate-x-1/2 rounded-full border border-dashed border-[#d1d5db] dark:border-white/20"
+            className="absolute top-4 left-1/2 size-[112px] -translate-x-1/2 rounded-full border border-dashed border-[#d1d5db]"
             animate={{ rotate: 360 }}
             transition={{ duration: 40, repeat: Infinity, ease: "linear" }}
           />

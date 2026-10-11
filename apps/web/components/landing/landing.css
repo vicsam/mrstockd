@@ -36,29 +36,12 @@
   overflow-x: clip;
 }
 
-@media (prefers-color-scheme: dark) {
-  .landing {
-    --l-canvas: #0d0c22;
-    --l-card: #1a1930;
-    --l-inset: #0d0c22;
-    --l-ink: #fcf8ff;
-    --l-ink-2: #fcf8ff;
-    --l-muted: #9ca3af;
-    --l-nav: #c4b8bd;
-    --l-border: rgba(255, 255, 255, 0.08);
-    --l-hairline: rgba(255, 255, 255, 0.08);
-    --l-row: rgba(255, 255, 255, 0.08);
-    --l-violet-soft: rgba(124, 92, 250, 0.22);
-    --l-violet-ink: #cabeff;
-    --l-header: rgba(26, 25, 48, 0.72);
-    --l-brand-text: #f58bb8;
-    --l-shadow-card: 0 8px 12px rgba(0, 0, 0, 0.35);
-    --l-shadow-panel: 0 8px 24px rgba(0, 0, 0, 0.4);
-  }
-  /* Dark icons from the design stay readable on dark surfaces. */
-  .landing .l-icon-ink {
-    filter: invert(1) hue-rotate(180deg) brightness(1.2);
-  }
+/*
+ * The landing page is always light, like the design, even when the visitor's
+ * device is in dark mode.
+ */
+.landing {
+  color-scheme: light;
 }
 
 .landing .l-mono {

@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import { BuiltForEveryone } from "@/components/landing/bento";
 import { jakarta } from "@/components/landing/font";
-import { REPO_URL } from "@/components/landing/content";
+import { REPO_URL, faqs } from "@/components/landing/content";
 import { LandingFooter } from "@/components/landing/footer";
 import { LandingHeader } from "@/components/landing/header";
+import { Faq } from "@/components/landing/faq";
 import { Hero } from "@/components/landing/hero";
+import { HowItWorks } from "@/components/landing/how-it-works";
 import { Integrations } from "@/components/landing/integrations";
 import { MotionProvider } from "@/components/landing/motion";
 import { ScrollProgress } from "@/components/landing/scroll-progress";
@@ -49,6 +51,10 @@ export default async function Home() {
   const jsonLd = {
     "@context": "https://schema.org",
     "@graph": [
+      {
+        "@type": "FAQPage",
+        mainEntity: faqs.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })),
+      },
       { "@type": "Organization", name: "MrStockd", url: siteUrl, logo: `${siteUrl}/landing/logo.png`, sameAs: [REPO_URL] },
       {
         "@type": "WebSite",
@@ -72,11 +78,13 @@ export default async function Home() {
         <LandingHeader />
         <main id="main">
           <Hero />
+          <HowItWorks gatewayUrl={gatewayUrl} />
           <BuiltForEveryone />
           <Integrations />
           <Trust />
           <Earnings />
           <Testers />
+          <Faq />
         </main>
         <LandingFooter status={status} statusUrl={`${gatewayUrl}/health`} />
       </MotionProvider>

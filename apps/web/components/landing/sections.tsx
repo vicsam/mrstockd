@@ -84,9 +84,9 @@ export function Trust() {
 }
 
 const roleStyles = {
-  core: "bg-[#0d0c22] text-white dark:bg-white dark:text-[#0d0c22]",
+  core: "bg-[#0d0c22] text-white",
   secondary: "bg-[var(--l-violet-soft)] text-[var(--l-ink-2)]",
-  later: "bg-[#ede9fe] text-[#5f3bdc] dark:bg-[rgba(124,92,250,0.22)] dark:text-[#cabeff]",
+  later: "bg-[#ede9fe] text-[#5f3bdc]",
 } as const;
 
 const deckHref = process.env.NEXT_PUBLIC_CONTACT_EMAIL
@@ -156,7 +156,7 @@ export function Earnings() {
             <Magnetic strength={0.15}>
               <a
                 href={deckHref}
-                className="l-press l-shine flex h-11 items-center rounded-full bg-[#0d0c22] px-5 text-[14px] leading-[18px] font-semibold tracking-[0.14px] text-white outline-none focus-visible:ring-2 focus-visible:ring-[var(--l-violet)] focus-visible:ring-offset-2 dark:bg-white dark:text-[#0d0c22]"
+                className="l-press l-shine flex h-11 items-center rounded-full bg-[#0d0c22] px-5 text-[14px] leading-[18px] font-semibold tracking-[0.14px] text-white outline-none focus-visible:ring-2 focus-visible:ring-[var(--l-violet)] focus-visible:ring-offset-2"
               >
                 Request the deck
               </a>
