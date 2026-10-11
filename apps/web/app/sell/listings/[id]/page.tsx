@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { SiteHeader } from "@/components/site-header";
 import { StatusBadge } from "@/components/status-badge";
-import { requireSession } from "@/lib/auth";
+import { isReviewer, requireSession } from "@/lib/auth";
 import { getCatalog } from "@/lib/catalog";
 import { serverEnv } from "@/lib/server-env";
 import { updateListingAction } from "../../actions";
@@ -48,6 +48,28 @@ export default async function EditListingPage({ params, searchParams }: { params
             <h1 className="text-3xl font-semibold tracking-tight">{listing.name}</h1>
             <StatusBadge status={listing.status} />
           </div>
+          {listing.status === "in_review" ? (
+            <p className="mt-3 text-sm">
+              {isReviewer(session) ? (
+                <>
+                  You're a reviewer:{" "}
+                  <a href="/admin/review" className="font-medium text-stock underline underline-offset-4">
+                    open the review queue
+                  </a>{" "}
+                  to approve it.
+                </>
+              ) : (
+                <>
+                  Waiting for a reviewer.{" "}
+                  {serverEnv().NODE_ENV !== "production" ? (
+                    <a href="/admin/review" className="underline underline-offset-4">
+                      Reviewing it yourself locally?
+                    </a>
+                  ) : null}
+                </>
+              )}
+            </p>
+          ) : null}
           {created && listing.status === "draft" ? <p className="mt-3 text-sm">Draft saved. Review the details below, then submit it for review.</p> : null}
         </div>
 
