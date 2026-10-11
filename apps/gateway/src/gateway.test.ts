@@ -135,6 +135,14 @@ afterAll(async () => {
 /* Tests                                                               */
 /* ------------------------------------------------------------------ */
 
+describe("discovery", () => {
+  it("explains itself at the root instead of a bare 404", async () => {
+    const res = await makeApp().request("/");
+    expect(res.status).toBe(200);
+    expect(((await res.json()) as { service: string }).service).toBe("MrStockd gateway");
+  });
+});
+
 describe("authentication", () => {
   it("rejects a missing or malformed key", async () => {
     const app = makeApp();

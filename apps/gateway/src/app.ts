@@ -78,6 +78,16 @@ export function createApp(deps: GatewayDeps) {
 
   app.get("/health", (c) => c.json({ ok: true, service: "gateway" }));
 
+  // People sometimes open the gateway in a browser; say what it is.
+  app.get("/", (c) =>
+    c.json({
+      service: "MrStockd gateway",
+      about: "This is the API that buyers' apps and AI agents call. It has no web pages.",
+      usage: "POST or GET /v1/tools/<tool-slug>/<path> with the header 'Authorization: Bearer <your MrStockd API key>'",
+      health: "/health",
+    }),
+  );
+
   app.all("/v1/tools/:slug/*", async (c) => {
     const started = performance.now();
     const slug = c.req.param("slug");
