@@ -42,9 +42,14 @@ export default async function SellPage() {
             <p className="text-sm text-muted">Selling as {seller.displayName}</p>
             <h1 className="text-3xl font-semibold tracking-tight">Your tools</h1>
           </div>
-          <a href="/sell/new" className="inline-flex min-h-11 items-center rounded-full bg-stock px-5 py-2.5 font-medium text-ink">
-            List a new tool
-          </a>
+          <div className="flex flex-wrap items-center gap-4">
+            <a href="/sell/dashboard" className="inline-flex min-h-11 items-center text-sm font-medium underline-offset-4 hover:underline">
+              Dashboard
+            </a>
+            <a href="/sell/new" className="inline-flex min-h-11 items-center rounded-full bg-stock px-5 py-2.5 font-medium text-ink">
+              List a new tool
+            </a>
+          </div>
         </div>
 
         {listings.length === 0 ? (

@@ -32,3 +32,26 @@ body {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Charts: colors validated for colorblind separation on each surface. */
+.chart {
+  --chart-ok: #3cbf6a;
+  --chart-fail: #d03b3b;
+  --chart-grid: #e3e1da;
+  --chart-axis: #6b6f78;
+}
+@media (prefers-color-scheme: dark) {
+  .chart {
+    --chart-ok: #2aa654;
+    --chart-fail: #c2413a;
+    --chart-grid: #2c3039;
+    --chart-axis: #9a9ea8;
+  }
+}
+.chart-ok { fill: var(--chart-ok); }
+.chart-fail { fill: var(--chart-fail); }
+.chart-swatch-ok { background: var(--chart-ok); }
+.chart-swatch-fail { background: var(--chart-fail); }
+.chart-grid { stroke: var(--chart-grid); }
+.chart-axis { fill: var(--chart-axis); font-size: 11px; }
+.chart-hover { fill: currentColor; opacity: 0.06; }

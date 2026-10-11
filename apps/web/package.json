@@ -15,6 +15,8 @@
     "@mrstockd/catalog": "workspace:*",
     "@mrstockd/core": "workspace:*",
     "@mrstockd/db": "workspace:*",
+    "ag-grid-community": "36.2.0",
+    "ag-grid-react": "36.2.0",
     "better-auth": "^1.7.7",
     "next": "^16.4.0",
     "react": "^19.3.0",

@@ -1,4 +1,4 @@
-import { type Catalog, createCatalog } from "@mrstockd/catalog";
+import { type Analytics, type Catalog, createAnalytics, createCatalog } from "@mrstockd/catalog";
 import { parseEncryptionKey } from "@mrstockd/core";
 import { getDb, serverEnv } from "./server-env";
 
@@ -13,4 +13,12 @@ export function getCatalog(): Catalog {
     allowPrivateEndpoints: env.GATEWAY_ALLOW_PRIVATE_UPSTREAMS === "true",
   });
   return instance;
+}
+
+let analytics: Analytics | undefined;
+
+/** Dashboard numbers. Seller views are owner-scoped; check reviewer rights before the admin view. */
+export function getAnalytics(): Analytics {
+  analytics ??= createAnalytics({ db: getDb() });
+  return analytics;
 }

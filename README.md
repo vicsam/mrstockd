@@ -48,7 +48,7 @@ The hackathon asks entrants to name each AI tool and PayPal capability and how i
 | Embedding model + pgvector | Semantic search over listings |
 | Model Context Protocol | MrStockd's MCP server for outside agents |
 | Render + Render Workflows | Hosting and durable background jobs |
-| AG Grid | Seller and admin dashboards |
+| AG Grid (Community) | Seller and admin dashboards: sortable, filterable, searchable tool and call grids with CSV export, themed for light and dark |
 
 ## Getting started
 
@@ -149,6 +149,13 @@ The gateway checks the key, the tool, the rate limit, and the buyer's credits or
 | `503 tool_unavailable` | The tool isn't live (paused or not yet approved). Sellers' test keys still work. |
 | `429 rate_limited` | Too many calls; wait for `Retry-After` seconds |
 | `502` / `504` | The seller's tool failed, timed out, or tried to redirect. No credit is charged. |
+
+## Dashboards
+
+- **Seller dashboard** (`/sell/dashboard`): calls in the last day and week, failure rate, buyers and revenue after the platform fee; a 14-day chart of successful and failed calls; and AG Grid tables of your tools (calls, test calls, failure rate, average and p95 response time, active keys, buyers, revenue) and your latest 200 calls. Only your own tools are included.
+- **Admin dashboard** (`/admin`, reviewers only): the same across every seller, with gross sales, platform fees, and tools waiting for review listed first.
+
+Every grid can be sorted, filtered, searched and exported to CSV. Failure rates carry a word (Healthy, Watch, Failing), not just a color, and the chart has a screen-reader table and keyboard-reachable values. Revenue counts completed orders only.
 
 ## Discovering tools over HTTP
 
