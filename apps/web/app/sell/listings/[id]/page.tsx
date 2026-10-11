@@ -48,7 +48,7 @@ export default async function EditListingPage({ params, searchParams }: { params
             <h1 className="text-3xl font-semibold tracking-tight">{listing.name}</h1>
             <StatusBadge status={listing.status} />
           </div>
-          {created ? <p className="mt-3 text-sm">Draft saved. Review the details below, then submit it for review.</p> : null}
+          {created && listing.status === "draft" ? <p className="mt-3 text-sm">Draft saved. Review the details below, then submit it for review.</p> : null}
         </div>
 
         <section aria-labelledby="status-heading" className="flex flex-col gap-4 rounded-xl border border-current/15 p-5">
