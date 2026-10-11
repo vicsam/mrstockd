@@ -24,7 +24,7 @@
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "generate": "drizzle-kit generate",
-    "migrate": "drizzle-kit migrate"
+    "migrate": "tsx --env-file-if-exists=../../.env src/migrate-cli.ts"
   },
   "dependencies": {
     "drizzle-orm": "^0.45.4",
@@ -36,6 +36,7 @@
     "@mrstockd/config": "workspace:*",
     "@types/node": "^22.19.0",
     "drizzle-kit": "^0.31.11",
+    "tsx": "^4.23.15",
     "typescript": "~5.9.3"
   }
 }

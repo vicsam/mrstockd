@@ -59,16 +59,27 @@ docker run -d --name mrstockd-db -p 5432:5432 \
   pgvector/pgvector:pg17
 ```
 
-Then:
+Then, from the repo root (on Windows, use Git Bash):
 
 ```bash
+npm install -g pnpm           # if pnpm isn't installed yet
 pnpm install
-cp .env.example .env          # set BETTER_AUTH_SECRET (openssl rand -base64 32)
+
+cp .env.example .env
+sed -i "s|^BETTER_AUTH_SECRET=.*|BETTER_AUTH_SECRET=$(openssl rand -base64 32)|" .env
+sed -i "s|^UPSTREAM_SECRET_ENCRYPTION_KEY=.*|UPSTREAM_SECRET_ENCRYPTION_KEY=$(openssl rand -base64 32)|" .env
+
 pnpm db:migrate               # creates the pgvector extension and all tables
-pnpm dev                      # runs every app
+pnpm dev                      # builds shared packages, then runs every app
 ```
 
 All apps read the single `.env` at the repo root. Real environment variables always take precedence over it.
+
+**Troubleshooting**
+
+- `db:migrate` explains any failure in plain words (database not running, wrong password, missing database) and how to fix it.
+- *Password rejected on Windows or macOS:* if PostgreSQL is also installed directly on your computer, it may be answering on port 5432 instead of Docker. Stop that service, or start the container with `-p 5433:5432` and change `DATABASE_URL` to use port `5433`.
+- *"Cannot find module @mrstockd/…":* the shared packages aren't built. `pnpm dev` builds them automatically; to do it by hand, run `pnpm build`.
 
 Tests need no database server: they run against an in-process Postgres (PGlite) with every migration applied.
 
