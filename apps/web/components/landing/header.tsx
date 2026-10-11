@@ -1,6 +1,6 @@
 "use client";
 
-import { AnimatePresence, m, useMotionValueEvent, useScroll } from "motion/react";
+import { AnimatePresence, m } from "motion/react";
 import Image from "next/image";
 import { useEffect, useId, useState } from "react";
 import { nav } from "./content";
@@ -47,21 +47,21 @@ function useActiveSection(ids: string[]): string | null {
 const sectionIds = nav.flatMap((n) => (n.section ? [n.section] : []));
 
 export function LandingHeader() {
-  const [hidden, setHidden] = useState(false);
   const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const [hovered, setHovered] = useState<string | null>(null);
   const menuId = useId();
-  const { scrollY } = useScroll();
   const active = useActiveSection(sectionIds);
   const signedIn = useSignedIn();
 
-  // Hide while scrolling down, show again on the way up.
-  useMotionValueEvent(scrollY, "change", (y) => {
-    const prev = scrollY.getPrevious() ?? 0;
-    if (open) return;
-    setHidden(y > 160 && y > prev + 2);
-    if (y < prev - 2 || y < 160) setHidden(false);
-  });
+  // The bar stays put while scrolling; it only gets a slightly more solid
+  // background once the page has moved, so text behind it stays readable.
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 24);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   useEffect(() => {
     if (!open) return;
@@ -72,19 +72,16 @@ export function LandingHeader() {
 
   // "Marketplace" is the active page at the top; sections take over as you scroll.
   const current = active ?? "marketplace";
-  const highlight = hovered ?? current;
   const account = signedIn ? { label: "Dashboard", href: "/sell/dashboard" } : { label: "Sign In", href: "/sign-in" };
 
   return (
-    <m.header
-      className="fixed inset-x-0 top-4 z-50 flex justify-center px-4 sm:top-6"
-      animate={{ y: hidden ? -120 : 0 }}
-      transition={{ duration: 0.45, ease: EASE }}
-    >
+    <header className="fixed inset-x-0 top-4 z-50 flex justify-center px-4 sm:top-6">
       <nav
         aria-label="Main"
         style={{ animationDelay: "0.1s" }}
-        className="l-in-drop relative w-full max-w-[760px] rounded-[32px] border border-[var(--l-hairline)] bg-[var(--l-header)] shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)] backdrop-blur-[12px] has-[[aria-expanded=true]]:bg-[var(--l-card)]"
+        className={`l-in-drop relative w-full max-w-[760px] rounded-[32px] border border-[var(--l-hairline)] backdrop-blur-[12px] transition-[background-color,box-shadow] duration-300 has-[[aria-expanded=true]]:bg-[var(--l-card)] ${
+          scrolled ? "bg-white/90 shadow-[0_12px_32px_-12px_rgba(13,12,34,0.22)]" : "bg-[var(--l-header)] shadow-[0_25px_50px_-12px_rgba(0,0,0,0.12)]"
+        }`}
       >
         <div className="flex h-16 items-center justify-between gap-4 px-[25px]">
           <a href="/" className="l-press shrink-0 rounded-md outline-none focus-visible:ring-2 focus-visible:ring-[var(--l-violet)]" aria-label="MrStockd home">
@@ -109,7 +106,7 @@ export function LandingHeader() {
                   >
                     {item.label}
                   </a>
-                  {highlight === key ? (
+                  {hovered === key ? (
                     <m.span
                       layoutId="nav-pill"
                       className="absolute -inset-x-3 inset-y-0 rounded-full bg-[rgba(175,26,93,0.08)]"
@@ -196,6 +193,6 @@ export function LandingHeader() {
           ) : null}
         </AnimatePresence>
       </nav>
-    </m.header>
+    </header>
   );
 }
