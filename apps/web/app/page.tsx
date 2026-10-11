@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { BuiltForEveryone } from "@/components/landing/bento";
+import { jakarta } from "@/components/landing/font";
 import { REPO_URL } from "@/components/landing/content";
 import { LandingFooter } from "@/components/landing/footer";
 import { LandingHeader } from "@/components/landing/header";
@@ -59,7 +60,7 @@ export default async function Home() {
   };
 
   return (
-    <div className="landing min-h-dvh">
+    <div className={`landing min-h-dvh ${jakarta.variable}`}>
       <a
         href="#main"
         className="fixed top-2 left-2 z-[70] -translate-y-20 rounded-full bg-[var(--l-brand)] px-4 py-2 text-sm font-semibold text-white transition-transform focus:translate-y-0"

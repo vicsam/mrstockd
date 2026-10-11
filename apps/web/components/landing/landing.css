@@ -3,7 +3,6 @@
  * ("Dark token architecture"). Scoped to .landing so app pages keep their
  * own look.
  */
-@import "@fontsource-variable/plus-jakarta-sans";
 
 .landing {
   --l-canvas: #f2f3f5;
@@ -30,7 +29,7 @@
   --l-shadow-panel: 0 8px 24px rgba(13, 12, 34, 0.08);
   --l-ease: cubic-bezier(0.16, 1, 0.3, 1);
 
-  font-family: "Plus Jakarta Sans Variable", ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
   background: var(--l-canvas);
   color: var(--l-ink);
   /* Wide decorative elements (the hero columns, the footer wordmark) never cause sideways scroll. */

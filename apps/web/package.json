@@ -11,7 +11,6 @@
     "typecheck": "next typegen && tsc --noEmit"
   },
   "dependencies": {
-    "@fontsource-variable/plus-jakarta-sans": "^5.3.0",
     "@mrstockd/auth": "workspace:*",
     "@mrstockd/catalog": "workspace:*",
     "@mrstockd/core": "workspace:*",
