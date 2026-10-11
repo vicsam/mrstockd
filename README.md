@@ -20,7 +20,7 @@ Built for the [PayPal AI Hackathon](https://paypalaihackathon.devpost.com/) (Oct
 
 ```
 apps/
-  web/        Next.js: storefront, checkout, seller and admin dashboards
+  web/        Next.js: landing page, storefront, checkout, seller and admin dashboards
   gateway/    Hono: API-key auth, credits, rate limits, metering, SSRF-safe proxy
   mcp/        MCP server: lets AI agents find and call tools
   workflows/  Render Workflows: vetting, access provisioning, seller payouts
@@ -48,6 +48,7 @@ The hackathon asks entrants to name each AI tool and PayPal capability and how i
 | Embedding model + pgvector | Semantic search over listings |
 | Model Context Protocol | MrStockd's MCP server for outside agents |
 | Render + Render Workflows | Hosting and durable background jobs |
+| Motion | Landing page animations and micro-interactions, loaded only on the landing page and respecting "reduce motion" |
 | AG Grid (Community) | Seller and admin dashboards: sortable, filterable, searchable tool and call grids with CSV export, themed for light and dark |
 
 ## Getting started

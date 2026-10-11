@@ -1,0 +1,246 @@
+/*
+ * Landing page tokens, from the Figma design and its dark-mode spec
+ * ("Dark token architecture"). Scoped to .landing so app pages keep their
+ * own look.
+ */
+@import "@fontsource-variable/plus-jakarta-sans";
+
+.landing {
+  --l-canvas: #f2f3f5;
+  --l-card: #ffffff;
+  --l-inset: #f2f3f5;
+  --l-ink: #0d0c22;
+  --l-ink-2: #1a1930;
+  --l-muted: #646b78; /* design #6b7280, nudged to reach 4.5:1 on the canvas */
+  --l-nav: #584147;
+  --l-border: #f3f5f9;
+  --l-hairline: rgba(26, 25, 48, 0.05);
+  --l-row: rgba(229, 231, 235, 0.5);
+  --l-brand: #af1a5d;
+  /* Brand colour for text; lighter in dark mode so it stays readable (4.5:1). */
+  --l-brand-text: #af1a5d;
+  --l-pink: #ea4c89;
+  --l-violet: #7c5cfa;
+  --l-violet-deep: #6340e6;
+  --l-violet-ink: #5f3bdc;
+  --l-violet-soft: #e3dffe;
+  --l-green: #10b981;
+  --l-header: rgba(255, 255, 255, 0.75);
+  --l-shadow-card: 0 8px 12px rgba(13, 12, 34, 0.08);
+  --l-shadow-panel: 0 8px 24px rgba(13, 12, 34, 0.08);
+  --l-ease: cubic-bezier(0.16, 1, 0.3, 1);
+
+  font-family: "Plus Jakarta Sans Variable", ui-sans-serif, system-ui, sans-serif;
+  background: var(--l-canvas);
+  color: var(--l-ink);
+  /* Wide decorative elements (the hero columns, the footer wordmark) never cause sideways scroll. */
+  overflow-x: clip;
+}
+
+@media (prefers-color-scheme: dark) {
+  .landing {
+    --l-canvas: #0d0c22;
+    --l-card: #1a1930;
+    --l-inset: #0d0c22;
+    --l-ink: #fcf8ff;
+    --l-ink-2: #fcf8ff;
+    --l-muted: #9ca3af;
+    --l-nav: #c4b8bd;
+    --l-border: rgba(255, 255, 255, 0.08);
+    --l-hairline: rgba(255, 255, 255, 0.08);
+    --l-row: rgba(255, 255, 255, 0.08);
+    --l-violet-soft: rgba(124, 92, 250, 0.22);
+    --l-violet-ink: #cabeff;
+    --l-header: rgba(26, 25, 48, 0.72);
+    --l-brand-text: #f58bb8;
+    --l-shadow-card: 0 8px 12px rgba(0, 0, 0, 0.35);
+    --l-shadow-panel: 0 8px 24px rgba(0, 0, 0, 0.4);
+  }
+  /* Dark icons from the design stay readable on dark surfaces. */
+  .landing .l-icon-ink {
+    filter: invert(1) hue-rotate(180deg) brightness(1.2);
+  }
+}
+
+.landing .l-mono {
+  font-family: "Liberation Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+/* Surfaces */
+.landing .l-card {
+  background: var(--l-card);
+  border: 1px solid var(--l-border);
+  border-radius: 24px;
+  box-shadow: var(--l-shadow-card);
+}
+.landing .l-panel {
+  background: var(--l-card);
+  border: 1px solid var(--l-border);
+  border-radius: 24px;
+  box-shadow: var(--l-shadow-panel);
+}
+.landing .l-inset {
+  background: var(--l-inset);
+  border: 1px solid var(--l-hairline);
+  border-radius: 18px;
+}
+
+/* Hover lift, per the design's motion spec: 200ms, cubic-bezier(0.16, 1, 0.3, 1), translateY(-4px). */
+.landing .l-lift {
+  transition:
+    transform 200ms var(--l-ease),
+    box-shadow 200ms var(--l-ease);
+}
+@media (hover: hover) {
+  .landing .l-lift:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 18px 32px rgba(13, 12, 34, 0.12);
+  }
+}
+
+/* Spring pills: press feedback on every button. */
+.landing .l-press {
+  transition: transform 160ms var(--l-ease);
+}
+.landing .l-press:active {
+  transform: scale(0.95);
+}
+
+/* Cursor spotlight on cards (position set from JS). */
+.landing .l-spotlight {
+  position: relative;
+  isolation: isolate;
+}
+.landing .l-spotlight::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: radial-gradient(420px circle at var(--mx, 50%) var(--my, 50%), rgba(124, 92, 250, 0.09), transparent 45%);
+  opacity: 0;
+  transition: opacity 300ms var(--l-ease);
+  pointer-events: none;
+}
+@media (hover: hover) {
+  .landing .l-spotlight:hover::before {
+    opacity: 1;
+  }
+}
+
+/* Shine sweep across primary buttons on hover. */
+.landing .l-shine {
+  position: relative;
+  overflow: hidden;
+}
+.landing .l-shine::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(110deg, transparent 30%, rgba(255, 255, 255, 0.35) 50%, transparent 70%);
+  transform: translateX(-120%);
+  pointer-events: none;
+}
+@media (hover: hover) {
+  .landing .l-shine:hover::after {
+    transform: translateX(120%);
+    transition: transform 700ms var(--l-ease);
+  }
+}
+
+/* Live dot */
+@keyframes l-ping {
+  0% { transform: scale(1); opacity: 0.6; }
+  80%, 100% { transform: scale(2.4); opacity: 0; }
+}
+.landing .l-ping::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  background: inherit;
+  animation: l-ping 2s var(--l-ease) infinite;
+}
+
+/* Arc gyro: gentle 4-second float on integration tiles (design spec). */
+@keyframes l-float {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 -6px; }
+}
+.landing .l-float {
+  animation: l-float 4s ease-in-out infinite;
+}
+
+/* Typing caret */
+@keyframes l-caret {
+  50% { opacity: 0; }
+}
+.landing .l-caret {
+  animation: l-caret 1s step-end infinite;
+}
+
+/* Marquee of builder photos on narrow screens */
+@keyframes l-marquee {
+  to { transform: translateX(-50%); }
+}
+.landing .l-marquee {
+  animation: l-marquee 40s linear infinite;
+}
+@media (hover: hover) {
+  .landing .l-marquee:hover {
+    animation-play-state: paused;
+  }
+}
+
+/* Footer wordmark mask */
+.landing .l-wordmark-mask {
+  mask-image: linear-gradient(to bottom, #000 30%, transparent 92%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing .l-float,
+  .landing .l-marquee,
+  .landing .l-ping::after,
+  .landing .l-caret {
+    animation: none;
+  }
+  .landing .l-lift,
+  .landing .l-press {
+    transition: none;
+  }
+}
+
+/*
+ * Above-the-fold entrance in pure CSS: it plays as soon as the HTML arrives,
+ * so the headline never waits for JavaScript (good for slow connections and
+ * for Largest Contentful Paint).
+ */
+@keyframes l-rise {
+  from { transform: translateY(100%); opacity: 0; filter: blur(8px); }
+  to { transform: none; opacity: 1; filter: none; }
+}
+@keyframes l-fade-up {
+  from { transform: translateY(12px); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+@keyframes l-pop {
+  0% { transform: translateY(12px) scale(0.6); opacity: 0; }
+  60% { transform: translateY(-2px) scale(1.04); opacity: 1; }
+  100% { transform: none; opacity: 1; }
+}
+@keyframes l-drop {
+  from { transform: translateY(-24px) scale(0.96); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+.landing .l-in-rise { animation: l-rise 0.9s var(--l-ease) both; }
+.landing .l-in-fade { animation: l-fade-up 0.8s var(--l-ease) both; }
+.landing .l-in-pop { animation: l-pop 0.7s var(--l-ease) both; }
+.landing .l-in-drop { animation: l-drop 0.8s var(--l-ease) both; }
+@media (prefers-reduced-motion: reduce) {
+  .landing .l-in-rise,
+  .landing .l-in-fade,
+  .landing .l-in-pop,
+  .landing .l-in-drop {
+    animation: none;
+  }
+}
