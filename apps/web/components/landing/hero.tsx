@@ -4,7 +4,8 @@ import { m, useMotionValue, useScroll, useSpring, useTransform, type MotionValue
 import Image from "next/image";
 import { useRef } from "react";
 import { hero, heroColumns } from "./content";
-import { EASE, Magnetic } from "./motion";
+import { HeroSearch } from "./hero-search";
+import { EASE } from "./motion";
 
 type Column = (typeof heroColumns)[number];
 type Card = { src: string; badge: string | null };
@@ -182,30 +183,25 @@ export function Hero() {
             {hero.subtitle}
           </p>
 
-          <div className="l-in-fade flex flex-col items-center gap-3 sm:flex-row sm:gap-5" style={{ animationDelay: "0.65s" }}>
-            <Magnetic>
-              <a
-                href={hero.cta.href}
-                className="l-press l-shine group flex h-12 items-center gap-2 rounded-full bg-gradient-to-r from-[#7c5cfa] to-[#6340e6] px-8 text-[14px] leading-[18px] font-semibold tracking-[0.14px] text-white drop-shadow-[0_10px_12px_rgba(124,92,250,0.32)] outline-none focus-visible:ring-2 focus-visible:ring-[#7c5cfa] focus-visible:ring-offset-2"
-              >
-                {hero.cta.label}
-                <img src="/landing/icons/hero-arrow.svg" alt="" width={12} height={12} className="size-3 transition-transform duration-300 group-hover:translate-x-1" />
-              </a>
-            </Magnetic>
-            <a
-              href={hero.secondary.href}
-              className="l-press group flex h-12 items-center gap-2 rounded-full border border-[var(--l-hairline)] bg-[var(--l-card)] px-6 text-[14px] leading-[18px] font-semibold tracking-[0.14px] text-[var(--l-ink)] shadow-[0_1px_2px_rgba(13,12,34,0.06)] outline-none hover:border-[rgba(175,26,93,0.3)] hover:text-[var(--l-brand-text)] focus-visible:ring-2 focus-visible:ring-[#7c5cfa] focus-visible:ring-offset-2"
-            >
-              {hero.secondary.label}
+          <div className="l-in-fade relative z-20 flex w-full flex-col items-center" style={{ animationDelay: "0.65s" }}>
+            <HeroSearch />
+          </div>
+          <div
+            style={{ animationDelay: "0.8s" }}
+            className="l-in-fade mt-5 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[13px] leading-5 font-medium text-[var(--l-muted)]"
+          >
+            <a href={hero.cta.href} className="outline-none hover:text-[var(--l-ink)] focus-visible:text-[var(--l-ink)]">
+              {hero.cta.label} →
+            </a>
+            <span aria-hidden className="size-1 rounded-full bg-[var(--l-hairline)]" />
+            <a href={hero.secondary.href} className="font-semibold text-[var(--l-brand-text)] outline-none hover:underline focus-visible:underline">
+              {hero.secondary.label} →
+            </a>
+            <span aria-hidden className="size-1 rounded-full bg-[var(--l-hairline)]" />
+            <a href="#how-it-works" className="outline-none hover:text-[var(--l-ink)] focus-visible:text-[var(--l-ink)]">
+              New here? See how it works
             </a>
           </div>
-          <a
-            href="#how-it-works"
-            style={{ animationDelay: "0.8s" }}
-            className="l-in-fade mt-6 text-[13px] leading-5 font-medium text-[var(--l-muted)] underline decoration-[var(--l-hairline)] underline-offset-4 outline-none hover:text-[var(--l-ink)] hover:decoration-current focus-visible:text-[var(--l-ink)]"
-          >
-            New here? See how it works
-          </a>
         </div>
       </div>
       <PhotoMarquee />

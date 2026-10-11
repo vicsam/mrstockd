@@ -32,7 +32,7 @@ export const hero = {
   title: ["AI tools worth", "trusting"],
   subtitle:
     "Builders list the AI tools they make. You, or your AI agent, buy them with PayPal and start using them in seconds with one API key. Every tool is reviewed by a person before it goes live.",
-  cta: { label: "Browse tools", href: "/tools" },
+  cta: { label: "Browse all tools", href: "/tools" },
   secondary: { label: "Sell your tool", href: "/sell" },
 };
 
@@ -119,14 +119,6 @@ export const faqs = [
   },
 ] as const;
 
-export const integrations = [
-  { id: "gmail", name: "Gmail", icon: "gmail", tilt: -16, outer: true, detail: { title: "Gmail: Let agents draft and file your email", body: "Hand inbox chores to an agent and approve what it sends." } },
-  { id: "slack", name: "Slack", icon: "slack", tilt: -8, outer: false, detail: { title: "Slack: Get agent updates in your channels", body: "Trigger autonomous workflows directly from Slack threads and alerts." } },
-  { id: "calendar", name: "Calendar", icon: "calendar", tilt: 0, outer: false, detail: { title: "Calendar: Book and move meetings for you", body: "Agents find a time that works and keep your schedule in sync." } },
-  { id: "notion", name: "Notion", icon: "notion", tilt: 8, outer: false, detail: { title: "Notion: Turn notes into finished work", body: "Agents read your docs and write summaries, plans and updates back." } },
-  { id: "zapier", name: "Zapier", icon: "zapier", tilt: 16, outer: true, detail: { title: "Zapier: Connect thousands of other apps", body: "Chain an agent into the automations you already run." } },
-] as const;
-
 export const trust = [
   {
     title: ["Builder verification and", "agent review"],
@@ -176,7 +168,7 @@ export const footerColumns = [
     title: "Marketplace",
     links: [
       { label: "Autonomous Workflows", href: "/tools" },
-      { label: "Compute Network", href: "/#integrations" },
+      { label: "How it works", href: "/#how-it-works" },
       { label: "Agentic Registry", href: "/tools" },
       { label: "Safety Architecture", href: "/#trust" },
     ],

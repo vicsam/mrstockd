@@ -497,7 +497,12 @@ export function createCatalog(deps: CatalogDeps) {
         return { items, total: count?.n ?? 0 };
       }
 
-      const tsQuery = sql`websearch_to_tsquery('english', ${query})`;
+      // Visitors type tasks in plain words ("extract invoice data"), so match
+      // tools that share ANY of the words and let the rank put the closest
+      // matches first. websearch_to_tsquery joins words with AND; turning
+      // those ANDs into ORs keeps its stemming and phrases; an AND in front of a
+      // "-word" exclusion is left alone so exclusions still exclude.
+      const tsQuery = sql`regexp_replace(websearch_to_tsquery('english', ${query})::text, ' & (?!!)', ' | ', 'g')::tsquery`;
       // Full-text match, plus a plain substring match on the name so partial
       // words ("invo") still find something.
       const matches = or(sql`${listings.searchVector} @@ ${tsQuery}`, sql`${listings.name} ilike ${`%${query.replace(/[%_\\]/g, "\\$&")}%`}`);

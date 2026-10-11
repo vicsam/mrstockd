@@ -246,6 +246,16 @@ describe("search", () => {
     expect(result.items[0]?.name).toBe("PDF Summarizer");
   });
 
+  it("finds tools from a plain-words task, even when not every word matches", async () => {
+    const result = await catalog.search({ query: "read my receipt photos please" });
+    expect(result.items[0]?.name).toBe("Receipt Reader");
+  });
+
+  it("still honours -word exclusions", async () => {
+    const result = await catalog.search({ query: "receipts -totals" });
+    expect(result.items.map((i) => i.name)).not.toContain("Receipt Reader");
+  });
+
   it("matches partial names as you type", async () => {
     expect((await catalog.search({ query: "yoru" })).items[0]?.name).toBe("Yoruba Translator");
   });

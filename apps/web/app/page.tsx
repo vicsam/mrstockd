@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { BuiltForEveryone } from "@/components/landing/bento";
+import { ClosingCta } from "@/components/landing/closing-cta";
 import { jakarta } from "@/components/landing/font";
 import { REPO_URL, faqs } from "@/components/landing/content";
 import { LandingFooter } from "@/components/landing/footer";
@@ -8,7 +9,6 @@ import { Faq } from "@/components/landing/faq";
 import { type FeaturedTool, FeaturedTools } from "@/components/landing/featured-tools";
 import { Hero } from "@/components/landing/hero";
 import { HowItWorks } from "@/components/landing/how-it-works";
-import { Integrations } from "@/components/landing/integrations";
 import { MotionProvider } from "@/components/landing/motion";
 import { ScrollProgress } from "@/components/landing/scroll-progress";
 import { Earnings, Trust } from "@/components/landing/sections";
@@ -97,10 +97,10 @@ export default async function Home() {
           <HowItWorks gatewayUrl={gatewayUrl} />
           <FeaturedTools tools={featured.tools} total={featured.total} />
           <BuiltForEveryone />
-          <Integrations />
           <Trust />
           <Earnings />
           <Faq />
+          <ClosingCta />
         </main>
         <LandingFooter status={status} statusUrl={`${gatewayUrl}/health`} />
       </MotionProvider>

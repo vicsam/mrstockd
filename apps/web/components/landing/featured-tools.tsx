@@ -6,11 +6,8 @@ import { EASE, spotlight, stagger } from "./motion";
 /** The few listing fields the landing page shows. Built on the server from live listings. */
 export type FeaturedTool = { slug: string; name: string; summary: string; price: string; sellerName: string };
 
-const suggestions = ["summarise a PDF", "extract invoice data", "write product copy", "transcribe audio"];
-
 /**
- * Real tools from the store, newest first, plus a search box that goes straight
- * to the catalog. Replaces the design's tester quotes: live listings say more
+ * Real tools from the store, newest first. Replaces the design's tester quotes: live listings say more
  * about the product than invented reviews.
  */
 export function FeaturedTools({ tools, total }: { tools: FeaturedTool[]; total: number }) {
@@ -28,55 +25,11 @@ export function FeaturedTools({ tools, total }: { tools: FeaturedTool[]; total: 
         </h2>
         <p className="max-w-[520px] text-[16px] leading-6 tracking-[-0.16px] text-[var(--l-muted)]">
           {total > 0
-            ? `${total} reviewed tool${total === 1 ? "" : "s"} you can buy and call today. Tell us what you need done.`
-            : "The first tools are going through review. Tell us what you need done, or list yours."}
+            ? `${total} reviewed tool${total === 1 ? "" : "s"} you can buy and call today.`
+            : "The first tools are going through review. List yours and it could be here."}
         </p>
       </m.div>
 
-      <m.form
-        role="search"
-        action="/tools"
-        className="flex w-full max-w-[620px] flex-col gap-3"
-        initial={{ opacity: 0, y: 16 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.5 }}
-        transition={{ duration: 0.6, ease: EASE, delay: 0.1 }}
-      >
-        <label htmlFor="landing-search" className="sr-only">
-          What do you need a tool for?
-        </label>
-        <div className="flex items-center gap-2 rounded-full border border-[var(--l-hairline)] bg-[var(--l-card)] p-1.5 pl-5 shadow-[var(--l-shadow-panel)] transition-shadow focus-within:shadow-[0_0_0_3px_rgba(175,26,93,0.18),var(--l-shadow-panel)]">
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" className="shrink-0 text-[var(--l-muted)]" aria-hidden>
-            <circle cx="11" cy="11" r="6.5" />
-            <path d="m16 16 4.5 4.5" />
-          </svg>
-          <input
-            id="landing-search"
-            name="q"
-            type="search"
-            maxLength={200}
-            placeholder="What do you need done?"
-            className="min-h-11 min-w-0 flex-1 bg-transparent text-[15px] text-[var(--l-ink)] outline-none placeholder:text-[var(--l-muted)]"
-          />
-          <button
-            type="submit"
-            className="l-press l-shine h-11 shrink-0 rounded-full bg-[var(--l-brand)] px-5 text-[14px] font-semibold text-white outline-none focus-visible:ring-2 focus-visible:ring-[var(--l-violet)] focus-visible:ring-offset-2"
-          >
-            Search
-          </button>
-        </div>
-        <div className="flex flex-wrap justify-center gap-2">
-          {suggestions.map((s) => (
-            <a
-              key={s}
-              href={`/tools?q=${encodeURIComponent(s)}`}
-              className="l-press rounded-full border border-[var(--l-hairline)] bg-[var(--l-card)] px-3 py-1.5 text-[12px] leading-4 font-medium text-[var(--l-ink-2)] outline-none hover:border-[rgba(175,26,93,0.3)] hover:text-[var(--l-brand-text)] focus-visible:ring-2 focus-visible:ring-[var(--l-violet)]"
-            >
-              {s}
-            </a>
-          ))}
-        </div>
-      </m.form>
 
       {tools.length > 0 ? (
         <m.ul
