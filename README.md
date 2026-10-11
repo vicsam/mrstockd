@@ -188,7 +188,9 @@ Build it once with `pnpm build`, then add it to your MCP client's config. Most c
 }
 ```
 
-To try it without an AI app, use the MCP Inspector: `npx @modelcontextprotocol/inspector node apps/mcp/dist/index.js`, then set the two variables in its sidebar.
+The server also reads `MRSTOCKD_GATEWAY_URL` and `MRSTOCKD_API_KEYS` from the repo-root `.env`, so for local use you can put your keys there instead; values in the client's config win.
+
+To try it without an AI app, put a key in `.env`, then run the MCP Inspector: `npx @modelcontextprotocol/inspector node apps/mcp/dist/index.js`, and connect to the server in the page it opens.
 
 Guardrails, enforced outside the model:
 
