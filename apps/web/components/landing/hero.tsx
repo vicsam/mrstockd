@@ -117,7 +117,7 @@ export function Hero() {
     <section
       ref={ref}
       aria-labelledby="hero-title"
-      className="relative flex flex-col items-center px-6 pt-[128px] pb-10 sm:px-[48px] sm:pt-[192px] sm:pb-[112px]"
+      className="relative flex flex-col items-center px-6 pt-[128px] pb-10 sm:px-[48px] sm:pt-[192px] sm:pb-[56px]"
       onPointerMove={(e) => {
         if (e.pointerType !== "mouse") return;
         const r = e.currentTarget.getBoundingClientRect();
@@ -129,7 +129,7 @@ export function Hero() {
         py.set(0);
       }}
     >
-      <div className="relative flex w-full max-w-[1320px] items-center justify-center lg:min-h-[580px] lg:py-[104.81px]">
+      <div className="relative flex w-full max-w-[1320px] items-center justify-center lg:min-h-[580px] lg:pt-[104.81px] lg:pb-[48px]">
         {heroColumns.map((column, i) => (
           <FlankColumn key={column.id} column={column} order={i} px={px} py={py} scroll={scrollYProgress} />
         ))}

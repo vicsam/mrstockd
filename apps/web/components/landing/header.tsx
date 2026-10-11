@@ -88,7 +88,7 @@ export function LandingHeader() {
             <Image src="/landing/logo.png" alt="MrStockd" width={106} height={32} priority className="h-8 w-auto" />
           </a>
 
-          <ul className="hidden items-center gap-[28px] lg:flex" onPointerLeave={() => setHovered(null)}>
+          <ul className="hidden items-center gap-5 lg:flex xl:gap-[28px]" onPointerLeave={() => setHovered(null)}>
             {nav.map((item) => {
               const key = item.section ?? "marketplace";
               const isActive = current === key;
@@ -100,7 +100,7 @@ export function LandingHeader() {
                     onFocus={() => setHovered(key)}
                     onBlur={() => setHovered(null)}
                     aria-current={isActive ? (item.section ? "location" : "page") : undefined}
-                    className={`relative z-10 block py-2 text-[14px] leading-[18px] tracking-[0.14px] outline-none transition-colors duration-200 focus-visible:text-[var(--l-brand-text)] ${
+                    className={`relative z-10 block py-2 text-[14px] whitespace-nowrap leading-[18px] tracking-[0.14px] outline-none transition-colors duration-200 focus-visible:text-[var(--l-brand-text)] ${
                       isActive ? "font-semibold text-[var(--l-brand-text)]" : "font-medium text-[var(--l-nav)] hover:text-[var(--l-ink)]"
                     }`}
                   >

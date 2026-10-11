@@ -118,7 +118,7 @@ export function HowItWorks({ gatewayUrl }: { gatewayUrl: string }) {
   const current = howItWorks[audience];
 
   return (
-    <section id="how-it-works" aria-labelledby="how-title" className="mx-auto flex w-full max-w-[1200px] scroll-mt-28 flex-col items-center gap-8 px-6 pt-[72px] pb-[80px] sm:pt-[96px]">
+    <section id="how-it-works" aria-labelledby="how-title" className="mx-auto flex w-full max-w-[1200px] scroll-mt-28 flex-col items-center gap-8 px-6 pt-[48px] pb-[80px] sm:pt-[64px]">
       <m.div
         className="flex max-w-[720px] flex-col items-center gap-4 text-center"
         initial={{ opacity: 0, y: 24 }}
