@@ -24,6 +24,8 @@ export function explain(error: unknown, target: string): string {
   switch (e?.code) {
     case "ECONNREFUSED":
       return `Nothing is accepting connections at ${target}.\n  Is the database running? Check with: docker ps`;
+    case "57P03":
+      return `The database at ${target} is still starting up and didn't finish in time. Try again in a moment.`;
     case "ENOTFOUND":
     case "EAI_AGAIN":
       return `The database host in DATABASE_URL can't be found (${target}). Check the hostname.`;
@@ -47,6 +49,15 @@ export function explain(error: unknown, target: string): string {
   }
 }
 
+/** Errors that mean "the database is still booting": worth waiting for. */
+function isStartingUp(error: unknown): boolean {
+  let e = error as { code?: string; cause?: unknown };
+  while (e && !e.code && e.cause) e = e.cause as typeof e;
+  return e?.code === "57P03" || e?.code === "ECONNREFUSED" || e?.code === "ECONNRESET";
+}
+
+const STARTUP_WAIT_MS = 30_000;
+
 async function main() {
   const url = process.env.DATABASE_URL;
   if (!url) {
@@ -54,15 +65,29 @@ async function main() {
     process.exit(1);
   }
   const target = describe(url);
-  const client = postgres(url, { max: 1, connect_timeout: 10, onnotice: () => {} });
-  try {
-    await migrate(drizzle(client), { migrationsFolder });
-    console.log(`✓ Database is up to date (${target})`);
-  } catch (error) {
-    console.error(`✗ Migration failed (${target})\n  ${explain(error, target)}`);
-    process.exitCode = 1;
-  } finally {
-    await client.end({ timeout: 5 });
+  const deadline = Date.now() + STARTUP_WAIT_MS;
+  let announced = false;
+
+  for (;;) {
+    const client = postgres(url, { max: 1, connect_timeout: 10, onnotice: () => {} });
+    try {
+      await migrate(drizzle(client), { migrationsFolder });
+      console.log(`✓ Database is up to date (${target})`);
+      return;
+    } catch (error) {
+      // A freshly started container needs a few seconds before it accepts connections.
+      if (isStartingUp(error) && Date.now() < deadline) {
+        if (!announced) console.log(`… Waiting for the database at ${target} to finish starting`);
+        announced = true;
+        await new Promise((r) => setTimeout(r, 1000));
+        continue;
+      }
+      console.error(`✗ Migration failed (${target})\n  ${explain(error, target)}`);
+      process.exitCode = 1;
+      return;
+    } finally {
+      await client.end({ timeout: 5 });
+    }
   }
 }
 
