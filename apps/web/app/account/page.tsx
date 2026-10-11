@@ -28,6 +28,15 @@ export default async function AccountPage() {
         <p className="mt-2 text-muted">Signed in as {session.user.email}</p>
       </section>
 
+      <nav aria-label="Shortcuts" className="flex flex-wrap gap-3">
+        <a href="/tools" className="inline-flex min-h-11 items-center rounded-full border border-current/20 px-4 py-2 text-sm font-medium">
+          Browse tools
+        </a>
+        <a href="/sell" className="inline-flex min-h-11 items-center rounded-full border border-current/20 px-4 py-2 text-sm font-medium">
+          Sell a tool
+        </a>
+      </nav>
+
       <section aria-labelledby="teams-heading" className="flex flex-col gap-6">
         <div>
           <h2 id="teams-heading" className="text-xl font-semibold">

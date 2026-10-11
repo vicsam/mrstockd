@@ -8,10 +8,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "next typegen && tsc --noEmit"
   },
   "dependencies": {
     "@mrstockd/auth": "workspace:*",
+    "@mrstockd/catalog": "workspace:*",
     "@mrstockd/core": "workspace:*",
     "@mrstockd/db": "workspace:*",
     "better-auth": "^1.7.7",

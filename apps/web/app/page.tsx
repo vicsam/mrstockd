@@ -13,10 +13,10 @@ export default function Home() {
         using it in seconds, whether you are a person or an agent shopping on someone&apos;s behalf.
       </p>
       <div className="flex flex-wrap gap-3">
-        <a href="/sign-up" className="inline-flex min-h-11 items-center rounded-full bg-stock px-5 py-2.5 font-medium text-ink">
-          Get started
+        <a href="/tools" className="inline-flex min-h-11 items-center rounded-full bg-stock px-5 py-2.5 font-medium text-ink">
+          Browse tools
         </a>
-        <a href="/sign-up" className="inline-flex min-h-11 items-center rounded-full border border-current/20 px-5 py-2.5 font-medium">
+        <a href="/sell" className="inline-flex min-h-11 items-center rounded-full border border-current/20 px-5 py-2.5 font-medium">
           Sell a tool
         </a>
       </div>

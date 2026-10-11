@@ -26,6 +26,7 @@ apps/
   workflows/  Render Workflows: vetting, access provisioning, seller payouts
 packages/
   auth/       Better Auth setup: accounts, sessions, teams (shared, tested)
+  catalog/    Sellers, listings, review workflow and search (shared, tested)
   core/       Pricing, API keys, secret encryption, SSRF guard (shared, tested)
   db/         Drizzle schema, migrations, and an in-memory test database
   config/     Shared TypeScript config
@@ -89,6 +90,23 @@ Tests need no database server: they run against an in-process Postgres (PGlite) 
 | Gateway | http://localhost:8787/health |
 
 Other commands: `pnpm typecheck`, `pnpm test`, `pnpm build`.
+
+## Selling a tool
+
+1. **Become a seller** at `/sell` (one profile per account).
+2. **List a tool** with its endpoint, an optional secret for your API, and a price: credit packs or a monthly plan. It starts as a draft.
+3. **Submit for review.** Reviewers (emails in `ADMIN_EMAILS`) approve it or send it back with a note, at `/admin/review`.
+4. **It goes live** at `/tools/<slug>` and in search. Buyers call it through the gateway at `/v1/tools/<slug>/…`.
+
+Rules the catalog enforces:
+
+- Only a reviewer can make a listing live; sellers can submit, withdraw, pause and resume.
+- Changing a live tool's endpoint or secret sends it back to review, so an approved tool can't quietly be pointed somewhere else.
+- A tool's address (slug) never changes, so buyers' integrations keep working after edits.
+- Sellers can only see and change their own listings; anyone else's look like they don't exist.
+- The seller's endpoint and secret are never shown publicly. The secret is encrypted and never shown again, even to the seller.
+
+Local tip: add your own email to `ADMIN_EMAILS` in `.env` to review your own test listings.
 
 ## Calling a tool through the gateway
 

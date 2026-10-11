@@ -3,19 +3,9 @@
 import { useRouter } from "next/navigation";
 import { type FormEvent, useState } from "react";
 import { Field, FormError, SubmitButton } from "@/components/form";
+import { slugify } from "@mrstockd/core/slug";
 import { authClient } from "@/lib/auth-client";
 import { useHydrated } from "@/lib/use-hydrated";
-
-/** "Lagos Labs Ltd." → "lagos-labs-ltd" */
-export function slugify(name: string): string {
-  return name
-    .toLowerCase()
-    .normalize("NFKD")
-    .replace(/[̀-ͯ]/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 48);
-}
 
 export function CreateTeamForm() {
   const router = useRouter();

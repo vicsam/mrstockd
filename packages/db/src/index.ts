@@ -12,8 +12,8 @@ export { and, asc, desc, eq, gt, gte, inArray, isNull, lt, lte, ne, or, sql } fr
 /** Any Drizzle Postgres database using this schema (postgres-js in prod, PGlite in tests). */
 export type AnyDb = PgDatabase<PgQueryResultHKT, typeof schema>;
 
-export function createDb(databaseUrl: string) {
-  const client = postgres(databaseUrl, { max: 10, prepare: false });
+export function createDb(databaseUrl: string, options: { maxConnections?: number } = {}) {
+  const client = postgres(databaseUrl, { max: options.maxConnections ?? 10, prepare: false });
   return drizzle(client, { schema });
 }
 

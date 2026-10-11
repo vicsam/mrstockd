@@ -12,6 +12,7 @@ const env = parseEnv(
     NODE_ENV: z.string().default("development"),
     PORT: z.coerce.number().default(8787),
     DATABASE_URL: z.string().min(1),
+    DATABASE_POOL_MAX: z.coerce.number().int().min(1).max(100).default(10),
     UPSTREAM_SECRET_ENCRYPTION_KEY: z.string().min(1),
     RATE_LIMIT_PER_MINUTE: z.coerce.number().int().positive().default(60),
     UPSTREAM_TIMEOUT_MS: z.coerce.number().int().positive().default(30_000),
@@ -25,7 +26,7 @@ if (allowPrivate && env.NODE_ENV === "production") {
 }
 
 const app = createApp({
-  store: createDbStore(createDb(env.DATABASE_URL)),
+  store: createDbStore(createDb(env.DATABASE_URL, { maxConnections: env.DATABASE_POOL_MAX })),
   upstream: createUpstreamClient({ allowPrivate, timeoutMs: env.UPSTREAM_TIMEOUT_MS }),
   rateLimiter: createMemoryRateLimiter(env.RATE_LIMIT_PER_MINUTE),
   encryptionKey: parseEncryptionKey(env.UPSTREAM_SECRET_ENCRYPTION_KEY),

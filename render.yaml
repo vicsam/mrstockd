@@ -2,6 +2,13 @@
 # Secrets use `sync: false`: you enter them in the Render dashboard, they are
 # never committed to this public repo.
 
+# Shared by web (encrypts sellers' secrets) and gateway (decrypts them).
+envVarGroups:
+  - name: mrstockd-shared
+    envVars:
+      - key: UPSTREAM_SECRET_ENCRYPTION_KEY
+        generateValue: true
+
 databases:
   - name: mrstockd-db
     plan: basic-256mb
@@ -31,6 +38,13 @@ services:
         generateValue: true
       - key: BETTER_AUTH_URL
         sync: false # the web service's public URL, e.g. https://mrstockd-web.onrender.com
+      - key: GATEWAY_PUBLIC_URL
+        sync: false # the gateway's public URL, e.g. https://mrstockd-gateway.onrender.com
+      - key: ADMIN_EMAILS
+        sync: false # who can review listings, comma-separated
+      - key: DATABASE_POOL_MAX
+        value: "5"
+      - fromGroup: mrstockd-shared
       - key: PAYPAL_CLIENT_ID
         sync: false
       - key: PAYPAL_CLIENT_SECRET
@@ -54,7 +68,8 @@ services:
           property: connectionString
       - key: NODE_ENV
         value: production
-      - key: UPSTREAM_SECRET_ENCRYPTION_KEY
-        sync: false
+      - fromGroup: mrstockd-shared
+      - key: DATABASE_POOL_MAX
+        value: "5"
       - key: RATE_LIMIT_PER_MINUTE
         value: "60"

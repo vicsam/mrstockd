@@ -32,6 +32,12 @@
       ],
       "cache": false,
       "persistent": true
+    },
+    "@mrstockd/web#typecheck": {
+      "dependsOn": [
+        "^build",
+        "@mrstockd/web#build"
+      ]
     }
   }
 }

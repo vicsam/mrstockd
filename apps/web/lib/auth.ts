@@ -1,9 +1,8 @@
 import { createAuth, type Auth } from "@mrstockd/auth";
-import { parseEnv } from "@mrstockd/core";
-import { createDb } from "@mrstockd/db";
 import { nextCookies } from "better-auth/next-js";
 import { headers } from "next/headers";
-import { z } from "zod";
+import { redirect } from "next/navigation";
+import { getDb, serverEnv } from "./server-env";
 
 let instance: Auth | undefined;
 
@@ -13,16 +12,9 @@ let instance: Auth | undefined;
  */
 export function getAuth(): Auth {
   if (instance) return instance;
-  const env = parseEnv(
-    z.object({
-      NODE_ENV: z.string().default("development"),
-      DATABASE_URL: z.string().min(1),
-      BETTER_AUTH_SECRET: z.string().min(32),
-      BETTER_AUTH_URL: z.url(),
-    }),
-  );
+  const env = serverEnv();
   instance = createAuth({
-    db: createDb(env.DATABASE_URL),
+    db: getDb(),
     secret: env.BETTER_AUTH_SECRET,
     baseURL: env.BETTER_AUTH_URL,
     production: env.NODE_ENV === "production",
@@ -37,4 +29,23 @@ export async function getSession() {
   // tries to prerender it (and touch the database) at build time.
   const requestHeaders = await headers();
   return getAuth().api.getSession({ headers: requestHeaders });
+}
+
+export type SessionData = NonNullable<Awaited<ReturnType<typeof getSession>>>;
+
+/** For pages that need a signed-in user: sends everyone else to sign-in. */
+export async function requireSession(): Promise<SessionData> {
+  const session = await getSession();
+  if (!session) redirect("/sign-in");
+  return session;
+}
+
+/** Reviewers are listed by email in ADMIN_EMAILS. */
+export function isReviewer(session: SessionData | null): boolean {
+  if (!session) return false;
+  const allowed = serverEnv()
+    .ADMIN_EMAILS.split(",")
+    .map((e) => e.trim().toLowerCase())
+    .filter(Boolean);
+  return allowed.includes(session.user.email.toLowerCase());
 }

@@ -82,6 +82,9 @@ importers:
       '@mrstockd/auth':
         specifier: workspace:*
         version: link:../../packages/auth
+      '@mrstockd/catalog':
+        specifier: workspace:*
+        version: link:../../packages/catalog
       '@mrstockd/core':
         specifier: workspace:*
         version: link:../../packages/core
@@ -153,6 +156,31 @@ importers:
       drizzle-orm:
         specifier: ^0.45.4
         version: 0.45.4(@electric-sql/pglite@0.5.8)(kysely@0.29.6)(postgres@3.4.9)
+    devDependencies:
+      '@mrstockd/config':
+        specifier: workspace:*
+        version: link:../config
+      '@types/node':
+        specifier: ^22.19.0
+        version: 22.20.5
+      typescript:
+        specifier: ~5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: ^5.0.3
+        version: 5.0.3(@types/node@22.20.5)(vite@8.3.4(@types/node@22.20.5)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15))
+
+  packages/catalog:
+    dependencies:
+      '@mrstockd/core':
+        specifier: workspace:*
+        version: link:../core
+      '@mrstockd/db':
+        specifier: workspace:*
+        version: link:../db
+      zod:
+        specifier: ^4.6.5
+        version: 4.6.5
     devDependencies:
       '@mrstockd/config':
         specifier: workspace:*

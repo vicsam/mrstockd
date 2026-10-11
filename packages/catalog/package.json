@@ -1,0 +1,31 @@
+{
+  "name": "@mrstockd/catalog",
+  "version": "0.0.0",
+  "private": true,
+  "license": "AGPL-3.0-only",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@mrstockd/core": "workspace:*",
+    "@mrstockd/db": "workspace:*",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@mrstockd/config": "workspace:*",
+    "@types/node": "^22.19.0",
+    "typescript": "~5.9.3",
+    "vitest": "^5.0.3"
+  }
+}
