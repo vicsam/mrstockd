@@ -85,7 +85,7 @@ export function LandingHeader() {
       >
         <div className="flex h-16 items-center justify-between gap-4 px-[25px]">
           <a href="/" className="l-press shrink-0 rounded-md outline-none focus-visible:ring-2 focus-visible:ring-[var(--l-violet)]" aria-label="MrStockd home">
-            <Image src="/landing/logo.png" alt="MrStockd" width={106} height={32} priority className="h-8 w-auto" />
+            <Image src="/landing/logo.png" alt="MrStockd" width={106} height={32} priority style={{ width: "auto", height: 32 }} />
           </a>
 
           <ul className="hidden items-center gap-5 lg:flex xl:gap-[28px]" onPointerLeave={() => setHovered(null)}>

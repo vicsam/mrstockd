@@ -15,7 +15,7 @@ export function AuthLayout({ topRight, children, footer, aside }: { topRight?: R
         <div className="flex min-h-dvh flex-col bg-[#faf8fd] px-6 py-8 sm:px-12 lg:px-20 lg:py-[86px]">
           <header className="flex items-center justify-between gap-4">
             <a href="/" aria-label="MrStockd home" className="rounded-md outline-none focus-visible:ring-2 focus-visible:ring-[var(--l-violet)]">
-              <Image src="/landing/logo.png" alt="MrStockd" width={106} height={32} priority className="h-8 w-auto" />
+              <Image src="/landing/logo.png" alt="MrStockd" width={106} height={32} priority style={{ width: "auto", height: 32 }} />
             </a>
             {topRight}
           </header>

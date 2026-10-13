@@ -20,7 +20,7 @@ export default async function WelcomePage() {
     <div className={`landing flex min-h-dvh flex-col ${jakarta.variable}`} style={{ ["--l-canvas" as string]: "#faf8fd" }}>
       <header className="flex items-center justify-between gap-4 border-b border-[rgba(26,25,48,0.06)] bg-white px-6 py-5 sm:px-7">
         <a href="/" aria-label="MrStockd home" className="rounded-md outline-none focus-visible:ring-2 focus-visible:ring-[var(--l-violet)]">
-          <Image src="/landing/logo.png" alt="MrStockd" width={106} height={32} priority className="h-8 w-auto" />
+          <Image src="/landing/logo.png" alt="MrStockd" width={106} height={32} priority style={{ width: "auto", height: 32 }} />
         </a>
         <span className="hidden items-center gap-2 rounded-full border border-[rgba(26,25,48,0.08)] bg-[#f6f4fb] px-3 py-1 text-[12px] font-semibold text-[var(--l-ink-2)] sm:inline-flex">
           <span className="size-1.5 rounded-full bg-[var(--l-brand)]" aria-hidden />
