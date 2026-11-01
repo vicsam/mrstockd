@@ -1,6 +1,7 @@
 "use client";
 
 import { joinEarlyAccess } from "@/app/early-access/actions";
+import type { FormEvent } from "react";
 import { useState, useTransition } from "react";
 
 type Role = "hire" | "build";
@@ -12,7 +13,7 @@ export function EarlyAccessForm({ defaultRole = "hire" }: { defaultRole?: Role }
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
 
-  function onSubmit(e: React.FormEvent) {
+  function onSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
     setMessage(null);

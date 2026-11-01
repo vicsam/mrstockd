@@ -1,3 +1,5 @@
+"use client";
+
 import { m } from "motion/react";
 import { EarlyAccessForm } from "./early-access-form";
 import { EASE, stagger } from "./motion";
