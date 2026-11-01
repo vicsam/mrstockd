@@ -16,3 +16,7 @@ next-env.d.ts
 
 # Files that dev tools generate for AI coding agents
 AGENTS.md
+
+# Local archives (may contain large/untracked artifacts)
+apps.zip
+*.zip

@@ -5,7 +5,9 @@ export type CatalogErrorCode =
   | "already_a_seller"
   | "invalid_transition"
   | "unsafe_endpoint"
-  | "limit_reached";
+  | "limit_reached"
+  | "capture_failed"
+  | "amount_mismatch";
 
 /**
  * Expected, user-facing failures. Anything else thrown from the catalog is a
