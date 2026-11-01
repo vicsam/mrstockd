@@ -42,6 +42,8 @@ The hackathon asks entrants to name each AI tool and PayPal capability and how i
 | PayPal Subscriptions | Monthly tool plans |
 | PayPal Multiparty / Payouts | Paying sellers and taking the platform fee |
 | PayPal Webhooks | Server-side payment confirmation before any key is issued |
+| @paypal/react-paypal-js | PayPal Checkout buttons in the browser |
+| PayPal Sandboxes | Test buying and selling without real money |
 | PayPal Agent Toolkit | Lets the shopping agent create and manage orders |
 | Vercel AI SDK | Provider-agnostic model access |
 | Large language model (via Vercel AI SDK) | Agent reasoning and tool use in the purchase flow |
@@ -91,6 +93,35 @@ Tests need no database server: they run against an in-process Postgres (PGlite) 
 | Gateway | http://localhost:8787/health |
 
 Other commands: `pnpm typecheck`, `pnpm test`, `pnpm build`.
+
+## PayPal (sandbox)
+
+MrStockd's checkout runs on PayPal's sandbox while it is a hackathon build. To make a
+purchase end to end you need:
+
+1. A PayPal Developer account. In [Apps & Credentials](https://developer.paypal.com/developer/applications), switch to **Sandbox** and create an app.
+2. Copy the sandbox **Client ID** and **Secret** into `.env`:
+   - `PAYPAL_ENV=sandbox`
+   - `PAYPAL_CLIENT_ID=<sandbox client id>`
+   - `PAYPAL_CLIENT_SECRET=<sandbox secret>`
+   - `NEXT_PUBLIC_PAYPAL_CLIENT_ID=<same sandbox client id>`
+3. In the Developer Dashboard, add a **Webhook** to that sandbox app, pointing at
+   `<public-url>/api/paypal/webhook` and subscribed to:
+   - `PAYMENT.CAPTURE.COMPLETED`
+   - `PAYMENT.CAPTURE.REFUNDED`
+   - `PAYMENT.CAPTURE.DENIED`
+   Then copy the resulting Webhook ID into `PAYPAL_WEBHOOK_ID`.
+4. Local development has no public URL, so the webhook can't reach your laptop on its
+   own. Either expose the web app with a tunnel (`ngrok http 3000` or `cloudflared`)
+   and use that URL for the webhook, or just ignore webhooks while developing:
+   buying still works, because the key is issued when the buyer returns to the
+   success URL and the capture is confirmed directly with PayPal. Tunnelling is
+   only needed if you want to exercise the refund/denied paths.
+5. Pay with a [sandbox personal account](https://developer.paypal.com/developer/accounts)
+   (sandbox buyer, not your developer account).
+
+Never commit real credentials. PayPal values belong in `.env`, which is gitignored;
+only `.env.example` (with empty values) is committed.
 
 ## Selling a tool
 
