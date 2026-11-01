@@ -21,6 +21,11 @@ const schema = z.object({
   /** Sign in with Apple: a Services ID and its signed client-secret JWT (optional). */
   APPLE_CLIENT_ID: z.string().default(""),
   APPLE_CLIENT_SECRET: z.string().default(""),
+  /** PayPal checkout (sandbox by default; never commit real credentials). */
+  PAYPAL_ENV: z.enum(["sandbox", "live"]).default("sandbox"),
+  PAYPAL_CLIENT_ID: z.string().default(""),
+  PAYPAL_CLIENT_SECRET: z.string().default(""),
+  PAYPAL_WEBHOOK_ID: z.string().default(""),
   /** Transactional email through Resend. Without it, emails are printed to the server log in development. */
   RESEND_API_KEY: z.string().default(""),
   EMAIL_FROM: z.string().default("MrStockd <onboarding@resend.dev>"),

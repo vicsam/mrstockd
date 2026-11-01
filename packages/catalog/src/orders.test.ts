@@ -1,6 +1,6 @@
 import { randomBytes } from "node:crypto";
 import { cents, parseEncryptionKey, toPayPalValue } from "@mrstockd/core";
-import { apiKeys, eq, orders, paypalWebhookEvents } from "@mrstockd/db";
+import { apiKeys, auditLog, eq, orders, paypalWebhookEvents } from "@mrstockd/db";
 import { createTestDb } from "@mrstockd/db/testing";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { type Catalog, CatalogError, createCatalog, type ListingInput } from "./index.js";
@@ -94,6 +94,10 @@ describe("completeOrder", () => {
     const keys = await testDb.db.select().from(apiKeys).where(eq(apiKeys.orderId, started.orderId));
     expect(keys).toHaveLength(1);
     expect(keys[0]!.environment).toBe("live");
+
+    const audits = await testDb.db.select().from(auditLog).where(eq(auditLog.actorId, "buyer-complete"));
+    expect(audits).toHaveLength(2);
+    expect(audits.map((a) => a.action).sort()).toEqual(["key.issued", "order.completed"]);
   });
 
   it("is idempotent: a second call returns already_completed with no key", async () => {
@@ -157,6 +161,15 @@ describe("completeOrder", () => {
       }),
       "capture_failed",
     );
+  });
+});
+
+describe("getOwnOrder", () => {
+  it("returns not_found for another user's order", async () => {
+    const listing = await liveListing("owner-own", { price: "4.99", creditsPerUnit: 100 });
+    const started = await ordersApi.startCreditPurchase("buyer-own-a", listing.slug, 1);
+    await ordersApi.savePayPalOrderId(started.orderId, "PAYPAL-ORDER-1");
+    await expectCatalogError(ordersApi.getOwnOrder(started.orderId, "buyer-own-b"), "not_found");
   });
 });
 

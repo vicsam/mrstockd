@@ -8,13 +8,15 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "typecheck": "next typegen && tsc --noEmit"
+    "typecheck": "next typegen && tsc --noEmit",
+    "test": "vitest run"
   },
   "dependencies": {
     "@mrstockd/auth": "workspace:*",
     "@mrstockd/catalog": "workspace:*",
     "@mrstockd/core": "workspace:*",
     "@mrstockd/db": "workspace:*",
+    "@mrstockd/payments": "workspace:*",
     "ag-grid-community": "36.2.0",
     "ag-grid-react": "36.2.0",
     "better-auth": "^1.7.7",
@@ -30,6 +32,7 @@
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.2.0",
     "tailwindcss": "^4.3.3",
-    "typescript": "~5.9.3"
+    "typescript": "~5.9.3",
+    "vitest": "^5.0.3"
   }
 }

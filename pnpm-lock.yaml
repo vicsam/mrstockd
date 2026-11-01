@@ -97,6 +97,9 @@ importers:
       '@mrstockd/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@mrstockd/payments':
+        specifier: workspace:*
+        version: link:../../packages/payments
       ag-grid-community:
         specifier: 36.2.0
         version: 36.2.0
@@ -140,6 +143,9 @@ importers:
       typescript:
         specifier: ~5.9.3
         version: 5.9.3
+      vitest:
+        specifier: ^5.0.3
+        version: 5.0.3(@types/node@22.20.5)(vite@8.3.4(@types/node@22.20.5)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15))
 
   apps/workflows:
     dependencies:
