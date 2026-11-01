@@ -339,6 +339,16 @@ export function createOrders(deps: OrdersDeps) {
       await db.update(paypalWebhookEvents).set({ processedAt: now() }).where(eq(paypalWebhookEvents.eventId, eventId));
     },
 
+    /** Reads a stored event's processing state, or null if it was never stored. */
+    async getWebhookEvent(eventId: string): Promise<{ processedAt: Date | null } | null> {
+      const [row] = await db
+        .select({ processedAt: paypalWebhookEvents.processedAt })
+        .from(paypalWebhookEvents)
+        .where(eq(paypalWebhookEvents.eventId, eventId))
+        .limit(1);
+      return row ?? null;
+    },
+
     /** The order a PayPal capture/refund/denial refers to, by its PayPal order id. */
     async findOrderByPaypalOrder(paypalOrderId: string) {
       const [row] = await db

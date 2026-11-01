@@ -16,10 +16,7 @@ function paypalOrderIdFromResource(resource: unknown): string | null {
     const href = typeof link.href === "string" ? link.href : "";
     const match = href.match(/\/orders\/([^/?#]+)/);
     if (match?.[1]) return decodeURIComponent(match[1]);
-    const capture = href.match(/\/captures\/([^/?#]+)/);
-    // capture ids are not order ids; ignore unless nothing else is found
   }
-  // fallback: some payloads put the PayPal order id directly
   if (typeof r.paypal_order_id === "string" && r.paypal_order_id) return r.paypal_order_id;
   return null;
 }
@@ -33,6 +30,10 @@ export async function POST(request: Request) {
     return Response.json({ error: "invalid_json" }, { status: 400 });
   }
 
+  const id = typeof event.id === "string" ? event.id : "";
+  const eventType = typeof event.event_type === "string" ? event.event_type : "unknown";
+  if (!id) return Response.json({ error: "missing_event_id" }, { status: 400 });
+
   const headers = {
     authAlgo: request.headers.get("paypal-auth-algo") ?? "",
     certUrl: request.headers.get("paypal-cert-url") ?? "",
@@ -40,10 +41,6 @@ export async function POST(request: Request) {
     transmissionSig: request.headers.get("paypal-transmission-sig") ?? "",
     transmissionTime: request.headers.get("paypal-transmission-time") ?? "",
   };
-
-  const id = typeof event.id === "string" ? event.id : "";
-  const eventType = typeof event.event_type === "string" ? event.event_type : "unknown";
-  if (!id) return Response.json({ error: "missing_event_id" }, { status: 400 });
 
   const paypal = getPayPal();
   let valid = false;
@@ -63,7 +60,14 @@ export async function POST(request: Request) {
 
   const orders = getOrders();
   const stored = await orders.storeWebhookEvent({ id, eventType, payload: event });
-  if (!stored) return Response.json({ received: true, duplicate: true }, { status: 200 });
+
+  // If the event was already stored, only reprocess it when it never finished.
+  if (!stored) {
+    const existing = await orders.getWebhookEvent(id);
+    if (!existing || existing.processedAt !== null) {
+      return Response.json({ received: true, duplicate: true }, { status: 200 });
+    }
+  }
 
   const resource = event.resource;
   try {
@@ -80,18 +84,14 @@ export async function POST(request: Request) {
           break;
         }
         if (order.status !== "completed") {
-          try {
-            const r = (resource ?? {}) as Record<string, unknown>;
-            const amountObj = (r.amount ?? {}) as Record<string, unknown>;
-            await orders.completeOrder(order.id, {
-              captureId: typeof r.id === "string" ? r.id : "webhook",
-              status: typeof r.status === "string" ? r.status : "COMPLETED",
-              amount: typeof amountObj.value === "string" ? amountObj.value : "",
-              currency: typeof amountObj.currency_code === "string" ? amountObj.currency_code : order.currency,
-            });
-          } catch (e) {
-            console.error("paypal webhook: completeOrder failed", e);
-          }
+          const r = (resource ?? {}) as Record<string, unknown>;
+          const amountObj = (r.amount ?? {}) as Record<string, unknown>;
+          await orders.completeOrder(order.id, {
+            captureId: typeof r.id === "string" ? r.id : "webhook",
+            status: typeof r.status === "string" ? r.status : "COMPLETED",
+            amount: typeof amountObj.value === "string" ? amountObj.value : "",
+            currency: typeof amountObj.currency_code === "string" ? amountObj.currency_code : order.currency,
+          });
         }
         break;
       }
@@ -106,11 +106,7 @@ export async function POST(request: Request) {
           console.warn("paypal webhook: unknown order", paypalOrderId, id);
           break;
         }
-        try {
-          await orders.refundOrder(order.id);
-        } catch (e) {
-          console.error("paypal webhook: refundOrder failed", e);
-        }
+        await orders.refundOrder(order.id);
         break;
       }
       case "PAYMENT.CAPTURE.DENIED": {
@@ -124,18 +120,15 @@ export async function POST(request: Request) {
           console.warn("paypal webhook: unknown order", paypalOrderId, id);
           break;
         }
-        try {
-          await orders.failOrder(order.id);
-        } catch (e) {
-          console.error("paypal webhook: failOrder failed", e);
-        }
+        await orders.failOrder(order.id);
         break;
       }
       default:
         break;
     }
   } catch (e) {
-    console.error("paypal webhook: handling failed", e);
+    console.error("paypal webhook: processing failed", e);
+    return Response.json({ error: "processing_failed" }, { status: 500 });
   }
 
   try {

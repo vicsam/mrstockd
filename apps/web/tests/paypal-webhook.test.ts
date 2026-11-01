@@ -23,6 +23,7 @@ describe("paypal webhook route", () => {
     vi.clearAllMocks();
     ordersMock = {
       storeWebhookEvent: vi.fn().mockResolvedValue(true),
+      getWebhookEvent: vi.fn().mockResolvedValue({ processedAt: new Date() }),
       markWebhookEventProcessed: vi.fn().mockResolvedValue(undefined),
       findOrderByPaypalOrder: vi.fn().mockResolvedValue({ id: "order-1", status: "created", currency: "USD" }),
       completeOrder: vi.fn().mockResolvedValue({ status: "already_completed" }),
@@ -128,5 +129,53 @@ describe("paypal webhook route", () => {
     );
     expect(res.status).toBe(200);
     expect(ordersMock.findOrderByPaypalOrder).not.toHaveBeenCalled();
+  });
+
+  it("reprocesses a stored-but-unprocessed event", async () => {
+    ordersMock.storeWebhookEvent.mockResolvedValue(false);
+    ordersMock.getWebhookEvent.mockResolvedValue({ processedAt: null });
+    ordersMock.findOrderByPaypalOrder.mockResolvedValue({ id: "order-1", status: "created", currency: "USD" });
+    ordersMock.completeOrder.mockResolvedValue({ status: "completed", key: { key: "k" } });
+    const res = await POST(
+      new Request("http://localhost/api/paypal/webhook", {
+        method: "POST",
+        body: JSON.stringify(makeEvent()),
+        headers: { "content-type": "application/json", ...VALID_HEADERS },
+      }),
+    );
+    expect(res.status).toBe(200);
+    expect(ordersMock.completeOrder).toHaveBeenCalledWith("order-1", expect.anything());
+  });
+
+  it("returns 500 when a handler throws", async () => {
+    ordersMock.storeWebhookEvent.mockResolvedValue(true);
+    ordersMock.findOrderByPaypalOrder.mockResolvedValue({ id: "order-1", status: "created", currency: "USD" });
+    ordersMock.completeOrder.mockRejectedValue(new Error("boom"));
+    const res = await POST(
+      new Request("http://localhost/api/paypal/webhook", {
+        method: "POST",
+        body: JSON.stringify(makeEvent()),
+        headers: { "content-type": "application/json", ...VALID_HEADERS },
+      }),
+    );
+    expect(res.status).toBe(500);
+  });
+
+  it("fails the order on PAYMENT.CAPTURE.DENIED", async () => {
+    ordersMock.storeWebhookEvent.mockResolvedValue(true);
+    ordersMock.findOrderByPaypalOrder.mockResolvedValue({ id: "order-1", status: "created", currency: "USD" });
+    const deniedEvent = makeEvent({
+      event_type: "PAYMENT.CAPTURE.DENIED",
+      resource: { id: "cap-1", status: "DENIED", amount: { currency_code: "USD", value: "9.98" }, supplementary_data: { related_ids: { order_id: "PP-1" } } },
+    });
+    const res = await POST(
+      new Request("http://localhost/api/paypal/webhook", {
+        method: "POST",
+        body: JSON.stringify(deniedEvent),
+        headers: { "content-type": "application/json", ...VALID_HEADERS },
+      }),
+    );
+    expect(res.status).toBe(200);
+    expect(ordersMock.failOrder).toHaveBeenCalledWith("order-1");
   });
 });

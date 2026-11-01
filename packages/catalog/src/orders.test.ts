@@ -199,6 +199,22 @@ describe("refundOrder and failOrder", () => {
   });
 });
 
+describe("revokeKey", () => {
+  it("returns false when revoking another user's key", async () => {
+    const listing = await liveListing("owner-revoke", { price: "4.99", creditsPerUnit: 100 });
+    const started = await ordersApi.startCreditPurchase("buyer-revoke-owner", listing.slug, 1);
+    await ordersApi.completeOrder(started.orderId, {
+      captureId: "CAP-RV",
+      status: "COMPLETED",
+      amount: started.amount,
+      currency: "USD",
+    });
+    const [key] = await testDb.db.select().from(apiKeys).where(eq(apiKeys.orderId, started.orderId));
+    const ok = await ordersApi.revokeKey("buyer-revoke-other", key!.id);
+    expect(ok).toBe(false);
+  });
+});
+
 describe("storeWebhookEvent", () => {
   it("stores an event id once and returns false on replay", async () => {
     const first = await ordersApi.storeWebhookEvent({

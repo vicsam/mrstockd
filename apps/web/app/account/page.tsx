@@ -32,6 +32,9 @@ export default async function AccountPage() {
         <a href="/tools" className="inline-flex min-h-11 items-center rounded-full border border-current/20 px-4 py-2 text-sm font-medium">
           Browse tools
         </a>
+        <a href="/account/keys" className="inline-flex min-h-11 items-center rounded-full border border-current/20 px-4 py-2 text-sm font-medium">
+          API keys
+        </a>
         <a href="/sell" className="inline-flex min-h-11 items-center rounded-full border border-current/20 px-4 py-2 text-sm font-medium">
           Sell a tool
         </a>
