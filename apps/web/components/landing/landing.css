@@ -8,12 +8,13 @@
   --l-canvas: #0b0b12;
   --l-card: #ffffff;
   --l-inset: #f3f4f6;
-  --l-ink: #0d0c22;
-  --l-ink-2: #1a1930;
-  --l-muted: #646b78;
-  --l-nav: #4b5563;
-  --l-border: #e5e7eb;
-  --l-hairline: rgba(13, 12, 34, 0.08);
+  /* Text on the dark canvas: light. */
+  --l-ink: #f5f5f7;
+  --l-ink-2: #e5e7eb;
+  --l-muted: #a1a1aa;
+  --l-nav: #d1d5db;
+  --l-border: rgba(255, 255, 255, 0.12);
+  --l-hairline: rgba(255, 255, 255, 0.10);
   --l-row: rgba(229, 231, 235, 0.5);
   --l-brand: #ea4c89;
   /* Darker pink for text/small elements to pass 4.5:1. */
@@ -50,17 +51,38 @@
   border: 1px solid var(--l-border);
   border-radius: 24px;
   box-shadow: var(--l-shadow-card);
+  --l-ink: #0d0c22;
+  --l-ink-2: #1a1930;
+  --l-muted: #646b78;
+  --l-nav: #4b5563;
+  --l-border: #e5e7eb;
+  --l-hairline: rgba(13, 12, 34, 0.08);
+  color: var(--l-ink);
 }
 .landing .l-panel {
   background: var(--l-card);
   border: 1px solid var(--l-border);
   border-radius: 24px;
   box-shadow: var(--l-shadow-panel);
+  --l-ink: #0d0c22;
+  --l-ink-2: #1a1930;
+  --l-muted: #646b78;
+  --l-nav: #4b5563;
+  --l-border: #e5e7eb;
+  --l-hairline: rgba(13, 12, 34, 0.08);
+  color: var(--l-ink);
 }
 .landing .l-inset {
   background: var(--l-inset);
   border: 1px solid var(--l-hairline);
   border-radius: 18px;
+  --l-ink: #0d0c22;
+  --l-ink-2: #1a1930;
+  --l-muted: #646b78;
+  --l-nav: #4b5563;
+  --l-border: #e5e7eb;
+  --l-hairline: rgba(13, 12, 34, 0.08);
+  color: var(--l-ink);
 }
 
 /* Hover lift, per the design's motion spec: 200ms, cubic-bezier(0.16, 1, 0.3, 1), translateY(-4px). */
