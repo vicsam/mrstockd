@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { SiteHeader } from "@/components/site-header";
+import { BuyWithPayPal } from "@/components/buy-with-paypal";
 import { getCatalog } from "@/lib/catalog";
+import { getOrders } from "@/lib/orders";
+import { getSession } from "@/lib/auth";
 import { describePricing } from "@/lib/format";
 import { serverEnv } from "@/lib/server-env";
 
@@ -15,6 +18,9 @@ export default async function ToolPage({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const tool = await getCatalog().getPublicListing(slug);
   if (!tool) notFound();
+
+  const session = await getSession();
+  const isOwner = session ? await getOrders().isOwnSeller(session.user.id, tool.id) : false;
 
   const callUrl = `${serverEnv().GATEWAY_PUBLIC_URL.replace(/\/$/, "")}/v1/tools/${tool.slug}/`;
 
@@ -36,19 +42,28 @@ export default async function ToolPage({ params }: { params: Promise<{ slug: str
             Pricing
           </h2>
           <p className="text-2xl font-semibold">{describePricing(tool)}</p>
-          <div>
-            <button
-              type="button"
-              disabled
-              aria-describedby="checkout-note"
-              className="min-h-11 rounded-full bg-stock px-5 py-2.5 font-medium text-ink opacity-60"
-            >
-              Buy with PayPal
-            </button>
-            <p id="checkout-note" className="mt-2 text-sm text-muted">
-              PayPal checkout is coming next.
+          {isOwner ? (
+            <p className="text-sm text-muted">
+              You own this tool, so you can't buy it. Sellers get a free test key from their dashboard instead.
             </p>
-          </div>
+          ) : !session ? (
+            <div className="flex flex-col gap-2">
+              <p className="text-sm text-muted">Sign in to buy this tool.</p>
+              <a
+                href={`/sign-in?next=${encodeURIComponent(`/tools/${tool.slug}`)}`}
+                className="min-h-11 self-start rounded-full bg-stock px-5 py-2.5 font-medium text-ink"
+              >
+                Sign in to buy
+              </a>
+            </div>
+          ) : (
+            <BuyWithPayPal
+              toolSlug={tool.slug}
+              toolName={tool.name}
+              unitPriceCents={tool.unitPriceCents}
+              creditsPerUnit={tool.creditsPerUnit}
+            />
+          )}
         </section>
 
         <section aria-labelledby="about-heading" className="flex flex-col gap-3">

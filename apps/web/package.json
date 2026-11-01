@@ -17,6 +17,7 @@
     "@mrstockd/core": "workspace:*",
     "@mrstockd/db": "workspace:*",
     "@mrstockd/payments": "workspace:*",
+    "@paypal/react-paypal-js": "^10.6.1",
     "ag-grid-community": "36.2.0",
     "ag-grid-react": "36.2.0",
     "better-auth": "^1.7.7",
