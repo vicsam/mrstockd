@@ -342,7 +342,7 @@ export function createOrders(deps: OrdersDeps) {
     /** The order a PayPal capture/refund/denial refers to, by its PayPal order id. */
     async findOrderByPaypalOrder(paypalOrderId: string) {
       const [row] = await db
-        .select({ id: orders.id, status: orders.status, buyerId: orders.buyerId, listingId: orders.listingId })
+        .select({ id: orders.id, status: orders.status, buyerId: orders.buyerId, listingId: orders.listingId, currency: orders.currency, subtotalCents: orders.subtotalCents })
         .from(orders)
         .innerJoin(listings, eq(listings.id, orders.listingId))
         .where(eq(orders.paypalOrderId, paypalOrderId))
