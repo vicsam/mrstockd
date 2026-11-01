@@ -45,7 +45,7 @@ export function FeaturedTools({ tools, total }: { tools: FeaturedTool[]; total: 
               <a
                 href={`/tools/${tool.slug}`}
                 onPointerMove={spotlight}
-                className="group l-card l-lift l-spotlight flex h-full flex-col gap-3 p-6 outline-none focus-visible:ring-2 focus-visible:ring-[var(--l-violet)]"
+                className="group l-card l-lift l-spotlight flex h-full flex-col gap-3 p-6 outline-none focus-visible:ring-2 focus-visible:ring-[var(--l-brand)]"
               >
                 <div className="flex items-start justify-between gap-3">
                   <span className="grid size-11 shrink-0 place-items-center rounded-[14px] bg-[rgba(175,26,93,0.08)] text-[16px] font-bold text-[var(--l-brand)]">

@@ -28,7 +28,7 @@ export function Faq() {
                   aria-expanded={isOpen}
                   aria-controls={panelId}
                   onClick={() => setOpen(isOpen ? null : i)}
-                  className="flex min-h-14 w-full items-center justify-between gap-4 px-6 py-4 text-left text-[16px] leading-6 font-semibold tracking-[-0.16px] text-[var(--l-ink)] outline-none focus-visible:ring-2 focus-visible:ring-[var(--l-violet)] focus-visible:ring-inset"
+                  className="flex min-h-14 w-full items-center justify-between gap-4 px-6 py-4 text-left text-[16px] leading-6 font-semibold tracking-[-0.16px] text-[var(--l-ink)] outline-none focus-visible:ring-2 focus-visible:ring-[var(--l-brand)] focus-visible:ring-inset"
                 >
                   {item.q}
                   <m.span

@@ -23,7 +23,7 @@ function ShareButton() {
   };
   return (
     <div className="relative">
-      <button type="button" onClick={share} aria-label="Share MrStockd" className="l-press grid size-10 place-items-center rounded-[12px] bg-[var(--l-inset)] outline-none hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-[var(--l-violet)]">
+      <button type="button" onClick={share} aria-label="Share MrStockd" className="l-press grid size-10 place-items-center rounded-[12px] bg-[var(--l-inset)] outline-none hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-[var(--l-brand)]">
         <img src="/landing/icons/social-share.svg" alt="" width={14} height={15} className="l-icon-ink h-[15px] w-[13.5px]" />
       </button>
       <AnimatePresence>
@@ -68,7 +68,7 @@ export function LandingFooter({ status, statusUrl }: { status: "ok" | "down" | "
           <div className="flex flex-col items-start gap-4 lg:col-span-4">
             <p className="max-w-[325px] text-[18px] leading-[22.5px] font-bold tracking-[-0.18px] text-[var(--l-ink-2)]">The trusted place to buy and sell AI agents.</p>
             {/* changed from design: shows the gateway's real status instead of a fixed "99.98% SLA". */}
-            <a href={statusUrl} className="flex items-center gap-2 rounded-full bg-[var(--l-inset)] px-3 py-[6px] outline-none hover:ring-1 hover:ring-[var(--l-border)] focus-visible:ring-2 focus-visible:ring-[var(--l-violet)]">
+            <a href={statusUrl} className="flex items-center gap-2 rounded-full bg-[var(--l-inset)] px-3 py-[6px] outline-none hover:ring-1 hover:ring-[var(--l-border)] focus-visible:ring-2 focus-visible:ring-[var(--l-brand)]">
               <span className={`relative size-2 rounded-full ${status === "ok" ? "l-ping bg-[var(--l-green)]" : status === "down" ? "bg-amber-500" : "bg-gray-400"}`} />
               <span className="l-mono text-[12px] leading-4 text-[var(--l-ink-2)]">{statusText}</span>
             </a>
@@ -103,7 +103,7 @@ export function LandingFooter({ status, statusUrl }: { status: "ok" | "down" | "
                   key={s.icon}
                   href={s.href}
                   aria-label={s.label}
-                  className="l-press grid size-10 place-items-center rounded-[12px] bg-[var(--l-inset)] outline-none hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-[var(--l-violet)]"
+                  className="l-press grid size-10 place-items-center rounded-[12px] bg-[var(--l-inset)] outline-none hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-[var(--l-brand)]"
                 >
                   <img src={`/landing/icons/${s.icon}.svg`} alt="" width={s.w} height={s.h} className="l-icon-ink" style={{ width: s.w, height: s.h }} />
                 </a>

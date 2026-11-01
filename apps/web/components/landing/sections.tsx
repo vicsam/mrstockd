@@ -58,7 +58,7 @@ export function Trust() {
                   <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/50 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
                 </m.div>
                 {card.later ? (
-                  <span className="rounded-full bg-[rgba(202,190,255,0.4)] px-2 py-[2px] text-[10px] leading-[15px] font-bold tracking-[0.5px] text-[var(--l-violet-ink)] uppercase">
+                  <span className="rounded-full bg-[rgba(234,76,137,0.16)] px-2 py-[2px] text-[10px] leading-[15px] font-bold tracking-[0.5px] text-[var(--l-brand-text)] uppercase">
                     [Later stage]
                   </span>
                 ) : null}
@@ -85,7 +85,7 @@ export function Trust() {
 
 const roleStyles = {
   core: "bg-[#0d0c22] text-white",
-  secondary: "bg-[var(--l-violet-soft)] text-[var(--l-ink-2)]",
+  secondary: "bg-[rgba(234,76,137,0.12)] text-[var(--l-ink-2)]",
   later: "bg-[#ede9fe] text-[#5f3bdc]",
 } as const;
 
@@ -156,7 +156,7 @@ export function Earnings() {
             <Magnetic strength={0.15}>
               <a
                 href={deckHref}
-                className="l-press l-shine flex h-11 items-center rounded-full bg-[#0d0c22] px-5 text-[14px] leading-[18px] font-semibold tracking-[0.14px] text-white outline-none focus-visible:ring-2 focus-visible:ring-[var(--l-violet)] focus-visible:ring-offset-2"
+                className="l-press l-shine flex h-11 items-center rounded-full bg-[#0d0c22] px-5 text-[14px] leading-[18px] font-semibold tracking-[0.14px] text-white outline-none focus-visible:ring-2 focus-visible:ring-[var(--l-brand)] focus-visible:ring-offset-2"
               >
                 Request the deck
               </a>
@@ -164,7 +164,7 @@ export function Earnings() {
             <Magnetic strength={0.15}>
               <a
                 href="/sign-up"
-                className="l-press flex h-11 items-center rounded-full border border-[var(--l-border)] bg-[var(--l-card)] px-[21px] text-[14px] leading-[18px] font-semibold tracking-[0.14px] text-[var(--l-ink)] outline-none hover:border-[var(--l-violet)] focus-visible:ring-2 focus-visible:ring-[var(--l-violet)]"
+                className="l-press flex h-11 items-center rounded-full border border-[var(--l-border)] bg-[var(--l-card)] px-[21px] text-[14px] leading-[18px] font-semibold tracking-[0.14px] text-[var(--l-ink)] outline-none hover:border-[var(--l-brand)] focus-visible:ring-2 focus-visible:ring-[var(--l-brand)]"
               >
                 Join the waitlist
               </a>

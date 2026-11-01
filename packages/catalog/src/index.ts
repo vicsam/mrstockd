@@ -5,3 +5,4 @@ export * from "./orders.js";
 export * from "./validation.js";
 export * from "./analytics.js";
 export * from "./interests.js";
+export * from "./waitlist.js";

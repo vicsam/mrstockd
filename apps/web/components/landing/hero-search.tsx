@@ -94,7 +94,7 @@ export function HeroSearch() {
         <label htmlFor="hero-search" className="sr-only">
           What do you need an AI tool to do?
         </label>
-        <div className="flex items-center gap-2 rounded-full border border-[var(--l-hairline)] bg-[var(--l-card)] p-1.5 pl-5 shadow-[0_18px_40px_-12px_rgba(13,12,34,0.18)] transition-shadow focus-within:shadow-[0_0_0_4px_rgba(124,92,250,0.18),0_18px_40px_-12px_rgba(13,12,34,0.18)]">
+        <div className="flex items-center gap-2 rounded-full border border-[var(--l-hairline)] bg-[var(--l-card)] p-1.5 pl-5 shadow-[0_18px_40px_-12px_rgba(13,12,34,0.18)] transition-shadow focus-within:shadow-[0_0_0_4px_rgba(234,76,137,0.18),0_18px_40px_-12px_rgba(13,12,34,0.18)]">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" className="shrink-0 text-[var(--l-muted)]" aria-hidden>
             <circle cx="11" cy="11" r="6.5" />
             <path d="m16 16 4.5 4.5" />
@@ -134,7 +134,7 @@ export function HeroSearch() {
           />
           <button
             type="submit"
-            className="l-press l-shine h-11 shrink-0 rounded-full bg-gradient-to-r from-[#7c5cfa] to-[#6340e6] px-5 text-[14px] font-semibold text-white shadow-[0_10px_12px_rgba(124,92,250,0.28)] outline-none focus-visible:ring-2 focus-visible:ring-[#7c5cfa] focus-visible:ring-offset-2 sm:px-6"
+            className="l-press l-shine h-11 shrink-0 rounded-full bg-gradient-to-r from-[#ea4c89] to-[#b81365] px-5 text-[14px] font-semibold text-white shadow-[0_10px_12px_rgba(234,76,137,0.28)] outline-none focus-visible:ring-2 focus-visible:ring-[#ea4c89] focus-visible:ring-offset-2 sm:px-6"
           >
             Find a tool
           </button>
@@ -160,7 +160,7 @@ export function HeroSearch() {
                       key={s}
                       type="button"
                       onClick={() => pick(s)}
-                      className="l-press min-h-9 rounded-full border border-[var(--l-hairline)] bg-[var(--l-inset)] px-3 text-[13px] font-medium text-[var(--l-ink-2)] outline-none hover:border-[rgba(124,92,250,0.4)] hover:text-[var(--l-violet-deep)] focus-visible:ring-2 focus-visible:ring-[var(--l-violet)]"
+                      className="l-press min-h-9 rounded-full border border-[var(--l-hairline)] bg-[var(--l-inset)] px-3 text-[13px] font-medium text-[var(--l-ink-2)] outline-none hover:border-[rgba(234,76,137,0.4)] hover:text-[var(--l-brand-text)] focus-visible:ring-2 focus-visible:ring-[var(--l-brand)]"
                     >
                       {s}
                     </button>
@@ -203,7 +203,7 @@ export function HeroSearch() {
                         onPointerEnter={() => setActive(i)}
                         className={`flex items-start gap-3 rounded-[16px] p-3 outline-none transition-colors ${i === active ? "bg-[var(--l-inset)]" : ""}`}
                       >
-                        <span className="grid size-10 shrink-0 place-items-center rounded-[12px] bg-[rgba(124,92,250,0.1)] text-[15px] font-bold text-[var(--l-violet-deep)]">
+                        <span className="grid size-10 shrink-0 place-items-center rounded-[12px] bg-[rgba(234,76,137,0.1)] text-[15px] font-bold text-[var(--l-brand-text)]">
                           {t.name.trim().charAt(0).toUpperCase()}
                         </span>
                         <span className="flex min-w-0 flex-1 flex-col gap-0.5">
@@ -213,7 +213,7 @@ export function HeroSearch() {
                           </span>
                           <span className="line-clamp-1 text-[13px] text-[var(--l-muted)]">{t.summary}</span>
                           {i === active ? (
-                            <m.span initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="l-mono overflow-hidden pt-1 text-[11px] text-[var(--l-violet-deep)]">
+                            <m.span initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="l-mono overflow-hidden pt-1 text-[11px] text-[var(--l-brand-text)]">
                               Pay with PayPal → get a key → POST /v1/tools/{t.slug}
                             </m.span>
                           ) : null}

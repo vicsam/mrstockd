@@ -1,0 +1,23 @@
+name: Production smoke
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    env:
+      BASE_URL: ${{ vars.PRODUCTION_URL || 'https://mrstockd.onrender.com' }}
+    steps:
+      - name: Wait for deploy to settle
+        run: sleep 120
+      - name: Check health
+        run: curl -fsS "${BASE_URL%/}/health" -o /dev/null
+      - name: Check catalog API
+        run: curl -fsS "${BASE_URL%/}/v1/catalog/tools?limit=1" -o /dev/null
+      - name: Check landing page
+        run: curl -fsS "${BASE_URL%/}/" -o /dev/null
+      - name: Check builders page
+        run: curl -fsS "${BASE_URL%/}/builders" -o /dev/null

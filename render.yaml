@@ -21,9 +21,8 @@ services:
     runtime: node
     plan: free # upgrade before judging (Dec 1) to avoid cold starts
     buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm --filter @mrstockd/web... build
-    startCommand: pnpm --filter @mrstockd/web start
-    # Paid instances can run migrations automatically before each deploy:
-    # preDeployCommand: pnpm db:migrate
+    autoDeployTrigger: checksPass
+    startCommand: node scripts/migrate-and-start.mjs
     healthCheckPath: /
     envVars:
       - key: NODE_VERSION
@@ -51,12 +50,15 @@ services:
         sync: false
       - key: PAYPAL_WEBHOOK_ID
         sync: false
+      - key: NEXT_PUBLIC_DEMO_VIDEO_URL
+        sync: false
 
   - type: web
     name: mrstockd-gateway
     runtime: node
     plan: free # upgrade before judging
     buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm --filter @mrstockd/gateway... build
+    autoDeployTrigger: checksPass
     startCommand: node apps/gateway/dist/index.js
     healthCheckPath: /health
     envVars:

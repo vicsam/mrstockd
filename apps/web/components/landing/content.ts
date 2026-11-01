@@ -13,15 +13,15 @@ export const REPO_URL = "https://github.com/vicsam/mrstockd";
 export const nav = [
   { label: "Marketplace", href: "/tools", section: null },
   { label: "How it works", href: "/#how-it-works", section: "how-it-works" },
-  { label: "Solutions", href: "/#built-for", section: "built-for" },
+  { label: "For builders", href: "/builders", section: null },
   { label: "Pricing", href: "/#pricing", section: "pricing" },
 ] as const;
 
 /** Photo cards flanking the hero headline, by column, top to bottom. */
 export const heroColumns = [
   { id: "outer-left", side: "left", depth: 1.4, cards: [{ src: "hero-1", badge: null }, { src: "hero-2", badge: null }] },
-  { id: "inner-left", side: "left", depth: 0.8, cards: [{ src: "hero-3", badge: "99.8%" }, { src: "hero-4", badge: null }] },
-  { id: "inner-right", side: "right", depth: 0.8, cards: [{ src: "hero-5", badge: "Top 1%" }, { src: "hero-6", badge: null }] },
+  { id: "inner-left", side: "left", depth: 0.8, cards: [{ src: "hero-3", badge: null }, { src: "hero-4", badge: null }] },
+  { id: "inner-right", side: "right", depth: 0.8, cards: [{ src: "hero-5", badge: null }, { src: "hero-6", badge: null }] },
   { id: "outer-right", side: "right", depth: 1.4, cards: [{ src: "hero-7", badge: null }, { src: "hero-8", badge: null }] },
 ] as const;
 
@@ -138,7 +138,7 @@ export const trust = [
   {
     title: ["Clear permission", "disclosure"],
     body: "Granular manifest files outlining precise data read/write envelopes, credential boundaries, and model routing.",
-    color: "#7c5cfa",
+    color: "#ea4c89",
     icon: "trust-key",
     later: true, // changed from design: not built yet
   },

@@ -45,7 +45,7 @@ function DemoButton() {
       type="button"
       onClick={() => state === "idle" && setState("running")}
       aria-live="polite"
-      className="l-press l-shine relative flex h-8 w-full items-center justify-center gap-1 overflow-hidden rounded-full bg-[var(--l-pink)] text-[12px] leading-4 font-semibold text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.05)] outline-none focus-visible:ring-2 focus-visible:ring-[var(--l-violet)]"
+      className="l-press l-shine relative flex h-8 w-full items-center justify-center gap-1 overflow-hidden rounded-full bg-[var(--l-pink)] text-[12px] leading-4 font-semibold text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.05)] outline-none focus-visible:ring-2 focus-visible:ring-[var(--l-brand)]"
     >
       {state === "idle" ? (
         <>
@@ -109,7 +109,7 @@ const bars = [
   { h: 28, c: "#ddd6fe" },
   { h: 36, c: "#c4b5fd" },
   { h: 44, c: "#a78bfa" },
-  { h: 48, c: "#7c5cfa" },
+  { h: 48, c: "#ea4c89" },
 ];
 
 function CountUp({ to, run }: { to: number; run: boolean }) {
@@ -208,9 +208,9 @@ function CommunityCard() {
             </m.div>
           ))}
           <m.div
-            className="relative grid size-12 place-items-center rounded-full drop-shadow-[0_10px_12px_rgba(124,92,250,0.32)]"
-            style={{ backgroundImage: "linear-gradient(45deg, #7c5cfa 0%, #cabeff 100%)" }}
-            animate={{ scale: [1, 1.06, 1], boxShadow: ["0 0 0 0 rgba(124,92,250,0.35)", "0 0 0 14px rgba(124,92,250,0)", "0 0 0 0 rgba(124,92,250,0)"] }}
+            className="relative grid size-12 place-items-center rounded-full drop-shadow-[0_10px_12px_rgba(234,76,137,0.32)]"
+            style={{ backgroundImage: "linear-gradient(45deg, #ea4c89 0%, #f58bb8 100%)" }}
+            animate={{ scale: [1, 1.06, 1], boxShadow: ["0 0 0 0 rgba(234,76,137,0.35)", "0 0 0 14px rgba(234,76,137,0)", "0 0 0 0 rgba(234,76,137,0)"] }}
             transition={{ duration: 2.4, repeat: Infinity, ease: "easeOut" }}
           >
             <img src="/landing/icons/shield.svg" alt="" width={16} height={20} className="h-5 w-4" />

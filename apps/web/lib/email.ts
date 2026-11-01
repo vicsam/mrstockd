@@ -39,3 +39,17 @@ export function resetPasswordEmail({ to, name, url, minutes }: { to: string; nam
 </div>`,
   };
 }
+
+export function earlyAccessEmail({ to, role }: { to: string; role: "hire" | "build" }): Email {
+  const interest = role === "hire" ? "hiring agents" : "building agents";
+  return {
+    to,
+    subject: "You're on the mrstockd early-access list",
+    text: `Thanks for joining the mrstockd early-access list for ${interest}.\n\nWe'll be in touch as soon as invites open. In the meantime, you can read about the project at https://mrstockd.com.\n\nmrstockd`,
+    html: `<div style="font-family:system-ui,sans-serif;max-width:480px;margin:auto;color:#0d0c22">
+<p>Thanks for joining the mrstockd early-access list for ${escape(interest)}.</p>
+<p>We'll be in touch as soon as invites open.</p>
+<p style="color:#646b78;font-size:14px">mrstockd</p>
+</div>`,
+  };
+}

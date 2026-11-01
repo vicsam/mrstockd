@@ -5,24 +5,20 @@
  */
 
 .landing {
-  --l-canvas: #f2f3f5;
+  --l-canvas: #0b0b12;
   --l-card: #ffffff;
-  --l-inset: #f2f3f5;
+  --l-inset: #f3f4f6;
   --l-ink: #0d0c22;
   --l-ink-2: #1a1930;
-  --l-muted: #646b78; /* design #6b7280, nudged to reach 4.5:1 on the canvas */
-  --l-nav: #584147;
-  --l-border: #f3f5f9;
-  --l-hairline: rgba(26, 25, 48, 0.05);
+  --l-muted: #646b78;
+  --l-nav: #4b5563;
+  --l-border: #e5e7eb;
+  --l-hairline: rgba(13, 12, 34, 0.08);
   --l-row: rgba(229, 231, 235, 0.5);
-  --l-brand: #af1a5d;
-  /* Brand colour for text; lighter in dark mode so it stays readable (4.5:1). */
-  --l-brand-text: #af1a5d;
+  --l-brand: #ea4c89;
+  /* Darker pink for text/small elements to pass 4.5:1. */
+  --l-brand-text: #9d174d;
   --l-pink: #ea4c89;
-  --l-violet: #7c5cfa;
-  --l-violet-deep: #6340e6;
-  --l-violet-ink: #5f3bdc;
-  --l-violet-soft: #e3dffe;
   --l-green: #10b981;
   --l-header: rgba(255, 255, 255, 0.75);
   --l-shadow-card: 0 8px 12px rgba(13, 12, 34, 0.08);
@@ -99,7 +95,7 @@
   inset: 0;
   z-index: -1;
   border-radius: inherit;
-  background: radial-gradient(420px circle at var(--mx, 50%) var(--my, 50%), rgba(124, 92, 250, 0.09), transparent 45%);
+  background: radial-gradient(420px circle at var(--mx, 50%) var(--my, 50%), rgba(234, 76, 137, 0.10), transparent 45%);
   opacity: 0;
   transition: opacity 300ms var(--l-ease);
   pointer-events: none;

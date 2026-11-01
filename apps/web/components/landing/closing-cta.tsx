@@ -23,7 +23,7 @@ export function ClosingCta() {
         />
         <m.span
           aria-hidden
-          className="absolute -right-24 -bottom-40 -z-10 size-[460px] rounded-full bg-[#7c5cfa] opacity-40 blur-[120px]"
+          className="absolute -right-24 -bottom-40 -z-10 size-[460px] rounded-full bg-[#ea4c89] opacity-40 blur-[120px]"
           animate={{ x: [0, -40, 0], y: [0, -20, 0] }}
           transition={{ duration: 16, repeat: Infinity, ease: "easeInOut" }}
         />

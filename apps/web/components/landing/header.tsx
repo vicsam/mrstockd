@@ -84,7 +84,7 @@ export function LandingHeader() {
         }`}
       >
         <div className="flex h-16 items-center justify-between gap-4 px-[25px]">
-          <a href="/" className="l-press shrink-0 rounded-md outline-none focus-visible:ring-2 focus-visible:ring-[var(--l-violet)]" aria-label="MrStockd home">
+          <a href="/" className="l-press shrink-0 rounded-md outline-none focus-visible:ring-2 focus-visible:ring-[var(--l-brand)]" aria-label="MrStockd home">
             <Image src="/landing/logo.png" alt="MrStockd" width={106} height={32} priority style={{ width: "auto", height: 32 }} />
           </a>
 
@@ -128,7 +128,7 @@ export function LandingHeader() {
             <Magnetic strength={0.2} className="hidden sm:block">
               <a
                 href="/sell"
-                className="l-press l-shine group flex h-10 items-center gap-[6px] rounded-full whitespace-nowrap bg-[var(--l-brand)] px-4 text-[14px] leading-[18px] font-semibold tracking-[0.14px] text-white shadow-[0_10px_12px_rgba(234,76,137,0.32)] outline-none focus-visible:ring-2 focus-visible:ring-[var(--l-violet)] focus-visible:ring-offset-2"
+                className="l-press l-shine group flex h-10 items-center gap-[6px] rounded-full whitespace-nowrap bg-[var(--l-brand)] px-4 text-[14px] leading-[18px] font-semibold tracking-[0.14px] text-white shadow-[0_10px_12px_rgba(234,76,137,0.32)] outline-none focus-visible:ring-2 focus-visible:ring-[var(--l-brand)] focus-visible:ring-offset-2"
               >
                 Deploy Agent
                 <img src="/landing/icons/header-arrow.svg" alt="" width={11} height={11} className="size-[10.667px] transition-transform duration-200 group-hover:translate-x-0.5" />
@@ -140,7 +140,7 @@ export function LandingHeader() {
               aria-controls={menuId}
               aria-label={open ? "Close menu" : "Open menu"}
               onClick={() => setOpen((v) => !v)}
-              className="l-press -mr-2 grid size-11 place-items-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-[var(--l-violet)] lg:hidden"
+              className="l-press -mr-2 grid size-11 place-items-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-[var(--l-brand)] lg:hidden"
             >
               <span className="relative block h-3 w-5" aria-hidden>
                 <m.span className="absolute inset-x-0 top-0 h-0.5 rounded bg-[var(--l-ink)]" animate={open ? { top: 5, rotate: 45 } : { top: 0, rotate: 0 }} />

@@ -64,7 +64,7 @@ function Preview({ audience, gatewayUrl }: { audience: Audience; gatewayUrl: str
           <p className="mb-3 text-[11px] font-bold tracking-[0.5px] text-white/50 uppercase">From your app</p>
           <pre className="l-mono overflow-x-auto text-[12px] leading-[20px] text-[#e5e7eb]">
             <span className="text-[#f58bb8]">curl</span> -X POST \{"\n"}
-            {"  "}{gatewayUrl}/v1/tools/<span className="text-[#cabeff]">pdf-summary</span>/run \{"\n"}
+            {"  "}{gatewayUrl}/v1/tools/<span className="text-[#f58bb8]">pdf-summary</span>/run \{"\n"}
             {"  "}-H <span className="text-[#86efac]">&quot;Authorization: Bearer mrs_…&quot;</span>
           </pre>
         </div>
@@ -72,7 +72,7 @@ function Preview({ audience, gatewayUrl }: { audience: Audience; gatewayUrl: str
           <p className="mb-3 text-[11px] font-bold tracking-[0.5px] text-[var(--l-muted)] uppercase">Or from your AI agent</p>
           <div className="flex flex-col gap-2 text-[13px] leading-5">
             <p className="self-end rounded-[14px] rounded-br-[4px] bg-[var(--l-inset)] px-3 py-2 text-[var(--l-ink)]">Summarise this contract for me.</p>
-            <p className="l-mono self-start rounded-[10px] bg-[rgba(124,92,250,0.1)] px-3 py-1.5 text-[11px] text-[var(--l-violet-deep)]">
+            <p className="l-mono self-start rounded-[10px] bg-[rgba(234,76,137,0.1)] px-3 py-1.5 text-[11px] text-[var(--l-brand-text)]">
               using MrStockd · pdf-summary
             </p>
             <p className="self-start rounded-[14px] rounded-bl-[4px] border border-[var(--l-border)] px-3 py-2 text-[var(--l-ink)]">
@@ -155,7 +155,7 @@ export function HowItWorks({ gatewayUrl }: { gatewayUrl: string }) {
                   }
                 }}
                 tabIndex={selected ? 0 : -1}
-                className={`relative min-h-11 rounded-full px-4 text-[13px] leading-[18px] font-semibold whitespace-nowrap outline-none transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-[var(--l-violet)] sm:px-5 sm:text-[14px] ${
+                className={`relative min-h-11 rounded-full px-4 text-[13px] leading-[18px] font-semibold whitespace-nowrap outline-none transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-[var(--l-brand)] sm:px-5 sm:text-[14px] ${
                   selected ? "text-white" : "text-[var(--l-nav)] hover:text-[var(--l-ink)]"
                 }`}
               >
@@ -206,7 +206,7 @@ export function HowItWorks({ gatewayUrl }: { gatewayUrl: string }) {
             <div className="flex justify-center">
               <a
                 href={current.cta.href}
-                className="l-press l-shine group flex h-12 items-center gap-2 rounded-full bg-[#0d0c22] px-7 text-[14px] leading-[18px] font-semibold tracking-[0.14px] text-white outline-none focus-visible:ring-2 focus-visible:ring-[var(--l-violet)] focus-visible:ring-offset-2"
+                className="l-press l-shine group flex h-12 items-center gap-2 rounded-full bg-[#0d0c22] px-7 text-[14px] leading-[18px] font-semibold tracking-[0.14px] text-white outline-none focus-visible:ring-2 focus-visible:ring-[var(--l-brand)] focus-visible:ring-offset-2"
               >
                 {current.cta.label}
                 <span aria-hidden className="transition-transform duration-200 group-hover:translate-x-0.5">

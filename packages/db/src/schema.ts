@@ -192,3 +192,22 @@ export const userInterests = pgTable("user_interests", {
   topics: text("topics").array().notNull().default(sql`'{}'::text[]`),
   ...timestamps,
 });
+
+export const waitlistRole = pgEnum("waitlist_role", ["hire", "build"]);
+
+/** Early-access signups from the marketing site. Email is stored lowercase. */
+export const waitlistEntries = pgTable("waitlist_entries", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  email: text("email").notNull(),
+  role: waitlistRole("role").notNull(),
+  name: text("name"),
+  agentDescription: text("agent_description"),
+  agentLink: text("agent_link"),
+  utmSource: text("utm_source"),
+  utmMedium: text("utm_medium"),
+  utmCampaign: text("utm_campaign"),
+  ...timestamps,
+}, (t) => [
+  uniqueIndex("waitlist_entries_email_idx").on(t.email),
+  index("waitlist_entries_created_at_idx").on(t.createdAt),
+]);
